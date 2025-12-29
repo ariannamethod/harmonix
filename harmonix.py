@@ -51,7 +51,7 @@ class Harmonix:
     - Creates numpy shards for persistence
     """
     
-    def __init__(self, db_path: str = 'cloud.db'):
+    def __init__(self, db_path: str = 'state/cloud.db'):
         """Initialize with database connection."""
         self.db_path = db_path
         self.conn = sqlite3.connect(db_path)

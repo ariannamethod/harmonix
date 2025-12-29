@@ -35,10 +35,10 @@ from dream_haiku import (HaikuDreamContext, DreamConfig, init_dream,
 def init_database():
     """Initialize cloud database with seed words."""
     # First, ensure harmonix initializes tables
-    harmonix_init = Harmonix('cloud.db')
+    harmonix_init = Harmonix('state/cloud.db')
     harmonix_init.close()
-    
-    conn = sqlite3.connect('cloud.db')
+
+    conn = sqlite3.connect('state/cloud.db')
     cursor = conn.cursor()
     
     # Check if words table has entries
@@ -74,19 +74,19 @@ def main():
     
     # Initialize database
     init_database()
-    
+
     # Initialize dream space
-    init_dream('cloud.db')
-    
+    init_dream('state/cloud.db')
+
     # Initialize components
-    db = sqlite3.connect('cloud.db')
+    db = sqlite3.connect('state/cloud.db')
     tokenizer = DualTokenizer()
     haiku_gen = HaikuGenerator(SEED_WORDS)
-    harmonix = Harmonix('cloud.db')
+    harmonix = Harmonix('state/cloud.db')
     rae = RecursiveAdapterEngine()
     meta = MetaHaiku(haiku_gen)
-    over = Overthinkg('cloud.db')
-    bridges = HaikuBridges('cloud.db')  # Phase 4: Island Bridges
+    over = Overthinkg('state/cloud.db')
+    bridges = HaikuBridges('state/cloud.db')  # Phase 4: Island Bridges
     
     # Interaction counter
     turn = 0
@@ -248,9 +248,9 @@ def main():
                 turn_count=turn
             )
             
-            if should_run_dream(dream_ctx, 'cloud.db'):
+            if should_run_dream(dream_ctx, 'state/cloud.db'):
                 # Run dream dialog in background
-                dream_haikus = run_dream_dialog(haiku_gen, best_haiku, 'cloud.db')
+                dream_haikus = run_dream_dialog(haiku_gen, best_haiku, 'state/cloud.db')
                 
                 if os.environ.get('HAIKU_DEBUG') == '1':
                     print(f"[Dream] Generated {len(dream_haikus)} dream haikus")
@@ -259,7 +259,7 @@ def main():
                 
                 # Feed best dream haikus back into cloud
                 for dh in dream_haikus:
-                    update_dream_fragments(dh, 'cloud.db')
+                    update_dream_fragments(dh, 'state/cloud.db')
                     # Also update haiku generator's chain
                     dream_tokens = tokenizer.tokenize_dual(dh)
                     haiku_gen.update_chain(dream_tokens['trigrams'])

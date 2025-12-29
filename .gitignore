@@ -31,7 +31,7 @@ cloud.db
 cloud.db-journal
 mathbrain.json
 shards/*.npy
-state/
+# state/  # Temporarily tracked for testing - see how cloud.db evolves
 
 # Unit test / coverage reports
 htmlcov/
