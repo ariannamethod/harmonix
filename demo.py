@@ -139,6 +139,34 @@ def main():
             print(best_haiku)
             print()
             
+            # Compute quality score for this haiku
+            # In v1: simple heuristic based on dissonance and pulse
+            # In v2: could be user feedback
+            quality = 0.5  # Base quality
+            
+            # Good quality indicators:
+            # - Moderate dissonance (not too high, not too low)
+            if 0.3 < dissonance < 0.7:
+                quality += 0.2
+            
+            # - Moderate entropy (balanced)
+            if 0.4 < pulse.entropy < 0.8:
+                quality += 0.15
+            
+            # - Some novelty but not too much
+            if 0.3 < pulse.novelty < 0.7:
+                quality += 0.15
+            
+            quality = min(1.0, max(0.0, quality))
+            
+            # MathBrain: observe and learn (Leo-style)
+            loss = haiku_gen.observe(best_haiku, quality, user_context=user_trigrams)
+            
+            # Debug: show learning stats
+            if os.environ.get('HAIKU_DEBUG') == '1':
+                stats = haiku_gen.get_stats()
+                print(f"[MathBrain] obs={stats['observations']}, loss={loss:.4f}, avg_loss={stats['running_loss']:.4f}")
+            
             # Background processes (not shown to user)
             
             # MetaHaiku: internal reflection

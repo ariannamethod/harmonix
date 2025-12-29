@@ -246,9 +246,10 @@ class HaikuGenerator:
     - Markov chains (order 2) for word transitions
     - MLP-style scoring (forked from Leo's mathbrain) for candidate selection
     - Temperature-controlled randomness
+    - Self-training: learns to predict quality through observation
     """
     
-    def __init__(self, seed_words: List[str] = None):
+    def __init__(self, seed_words: List[str] = None, state_path: str = 'mathbrain.json'):
         """Initialize with seed word vocabulary."""
         if seed_words is None:
             seed_words = SEED_WORDS
@@ -264,8 +265,18 @@ class HaikuGenerator:
         self.mlp_scorer = MLP(5, [8, 1])
         self.scoring_history = []
         
+        # MathBrain training config
+        self.lr = 0.01  # Learning rate
+        self.observations = 0
+        self.running_loss = 0.0
+        self.last_loss = 0.0
+        self.state_path = state_path
+        
         # Build initial Markov chain from seed words
         self._build_initial_chain()
+        
+        # Try to load previous state (Leo-style persistence)
+        self._load_mathbrain_state()
     
     def _build_initial_chain(self):
         """Create initial Markov transitions from seed words."""
@@ -472,3 +483,186 @@ class HaikuGenerator:
     def get_recent_trigrams(self) -> List[Tuple[str, str, str]]:
         """Return recent trigrams for dissonance calculation."""
         return self.recent_trigrams
+    
+    def observe(self, haiku: str, quality: float, user_context: List[Tuple[str, str, str]] = None) -> float:
+        """
+        Observe one (haiku, quality) pair and learn from it.
+        This is the MathBrain training loop (forked from Leo).
+        
+        Steps:
+        1. Extract features from haiku
+        2. Forward pass → predicted quality
+        3. Compute MSE loss
+        4. Backward pass
+        5. SGD step
+        6. Clamp weights to safe range
+        7. Update statistics
+        
+        Args:
+            haiku: Generated haiku text
+            quality: True quality score (0-1) from user feedback or assessment
+            user_context: Optional user trigrams for resonance
+        
+        Returns:
+            Current loss value
+        """
+        # Safety: skip if quality is invalid
+        if not math.isfinite(quality):
+            return self.last_loss
+        
+        quality = max(0.0, min(1.0, quality))
+        
+        # Extract features
+        lines = haiku.split('\n')
+        words = []
+        for line in lines:
+            words.extend(line.split())
+        
+        if len(words) < 3:
+            return self.last_loss
+        
+        # Feature 1: Perplexity
+        perplexity = 0.0
+        for i in range(len(words) - 2):
+            w1, w2, w3 = words[i], words[i+1], words[i+2]
+            key = (w1, w2)
+            if key in self.markov_chain and w3 in self.markov_chain[key]:
+                perplexity += self.markov_chain[key][w3]
+            else:
+                perplexity += 0.1
+        perplexity_score = perplexity / max(1, len(words) - 2)
+        perplexity_score = min(1.0, perplexity_score / 10.0)
+        
+        # Feature 2: Entropy
+        unique_words = len(set(words))
+        entropy_score = unique_words / len(words) if words else 0
+        
+        # Feature 3: Resonance
+        resonance_score = 0.0
+        if user_context:
+            user_words = set()
+            for t in user_context:
+                user_words.update(t)
+            haiku_words = set(words)
+            overlap = len(user_words & haiku_words)
+            resonance_score = overlap / max(1, len(user_words))
+        
+        # Feature 4: Length ratio
+        total_syllables = sum(self._count_syllables(w) for w in words)
+        length_ratio = min(1.0, total_syllables / 17.0) if total_syllables > 0 else 0.5
+        
+        # Feature 5: Unique ratio
+        unique_ratio = unique_words / max(1, len(words))
+        
+        features = [perplexity_score, entropy_score, resonance_score, length_ratio, unique_ratio]
+        
+        # Safety check
+        if not all(math.isfinite(f) for f in features):
+            return self.last_loss
+        
+        # Build Value nodes
+        x = [Value(f) for f in features]
+        
+        # Forward pass
+        q_hat = self.mlp_scorer(x)
+        
+        # Loss: MSE
+        diff = q_hat - Value(quality)
+        loss = diff * diff
+        
+        # Backward pass
+        for p in self.mlp_scorer.parameters():
+            p.grad = 0.0
+        loss.backward()
+        
+        # SGD step
+        for p in self.mlp_scorer.parameters():
+            p.data -= self.lr * p.grad
+        
+        # Clamp weights to safe range [-5.0, 5.0]
+        for p in self.mlp_scorer.parameters():
+            if math.isfinite(p.data):
+                p.data = max(-5.0, min(5.0, p.data))
+            else:
+                p.data = 0.0  # Reset corrupted weights
+        
+        # Check for corruption
+        loss_val = loss.data
+        if not math.isfinite(loss_val):
+            # Reset to fresh initialization
+            self.mlp_scorer = MLP(5, [8, 1])
+            self.observations = 0
+            self.running_loss = 0.0
+            return 0.0
+        
+        # Update stats
+        self.observations += 1
+        self.last_loss = loss_val
+        # Exponential moving average
+        self.running_loss += (loss_val - self.running_loss) * 0.05
+        
+        return loss_val
+    
+    def _save_mathbrain_state(self) -> None:
+        """Save MLP weights to JSON (Leo-style persistence)."""
+        try:
+            import json
+            import os
+            
+            weights = {
+                "observations": self.observations,
+                "running_loss": self.running_loss,
+                "last_loss": self.last_loss,
+                "lr": self.lr,
+                "parameters": [p.data for p in self.mlp_scorer.parameters()],
+            }
+            
+            with open(self.state_path, 'w') as f:
+                json.dump(weights, f, indent=2)
+        except Exception:
+            # Silent fail - saving must never break generation
+            pass
+    
+    def _load_mathbrain_state(self) -> None:
+        """Load MLP weights from JSON if available."""
+        try:
+            import json
+            import os
+            
+            if not os.path.exists(self.state_path):
+                return
+            
+            with open(self.state_path, 'r') as f:
+                data = json.load(f)
+            
+            # Restore weights
+            params = self.mlp_scorer.parameters()
+            saved_params = data.get("parameters", [])
+            
+            if len(params) != len(saved_params):
+                return  # Dimension mismatch
+            
+            for p, val in zip(params, saved_params):
+                p.data = float(val)
+            
+            # Restore stats
+            self.observations = data.get("observations", 0)
+            self.running_loss = data.get("running_loss", 0.0)
+            self.last_loss = data.get("last_loss", 0.0)
+        except Exception:
+            # Silent fail - start fresh if loading fails
+            pass
+    
+    def save(self) -> None:
+        """Public API to save state (call on exit)."""
+        self._save_mathbrain_state()
+    
+    def get_stats(self) -> Dict:
+        """Return training statistics."""
+        return {
+            "observations": self.observations,
+            "running_loss": self.running_loss,
+            "last_loss": self.last_loss,
+            "learning_rate": self.lr,
+            "num_parameters": len(self.mlp_scorer.parameters()),
+        }
