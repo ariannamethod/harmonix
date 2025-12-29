@@ -205,8 +205,8 @@ class TestFullIntegration:
 
     def test_database_persistence(self, system):
         """Test database persistence across operations."""
-        # Perform interaction
-        tokens = system['tokenizer'].tokenize_dual("test persistence")
+        # Perform interaction (need >= 3 words for trigrams)
+        tokens = system['tokenizer'].tokenize_dual("test persistence with cloud")
         system['harmonix'].morph_cloud(tokens['subwords'])
         system['harmonix'].update_trigrams(tokens['trigrams'])
 
