@@ -141,7 +141,7 @@ def _with_connection(db_path: Path, fn: Callable[[sqlite3.Connection], Any]) -> 
 # INITIALIZATION
 # ============================================================================
 
-def init_dream(db_path: str = 'cloud.db', bootstrap_haikus: List[str] = None) -> None:
+def init_dream(db_path: str = 'state/cloud.db', bootstrap_haikus: List[str] = None) -> None:
     """
     Initialize dream module.
     
@@ -185,7 +185,7 @@ def init_dream(db_path: str = 'cloud.db', bootstrap_haikus: List[str] = None) ->
 
 def should_run_dream(
     ctx: HaikuDreamContext,
-    db_path: str = 'cloud.db',
+    db_path: str = 'state/cloud.db',
     config: DreamConfig = None
 ) -> bool:
     """
@@ -265,7 +265,7 @@ def _get_friend_seed(db_path: str, max_fragments: int = 3) -> str:
 def run_dream_dialog(
     haiku_generator,
     last_haiku: str,
-    db_path: str = 'cloud.db',
+    db_path: str = 'state/cloud.db',
     config: DreamConfig = None
 ) -> List[str]:
     """
@@ -346,7 +346,7 @@ def run_dream_dialog(
 # BOOTSTRAP UPDATE: FEED DREAM HAIKUS BACK
 # ============================================================================
 
-def update_dream_fragments(haiku: str, db_path: str = 'cloud.db'):
+def update_dream_fragments(haiku: str, db_path: str = 'state/cloud.db'):
     """
     Add haiku lines to dream fragments for future friend generation.
     Decays existing fragments to keep it fresh.

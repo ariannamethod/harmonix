@@ -145,7 +145,7 @@ class HaikuBridges:
         flows = bridges.suggest_next_states("d0.7_e0.5_q0.6")
     """
     
-    def __init__(self, db_path: str = 'cloud.db'):
+    def __init__(self, db_path: str = 'state/cloud.db'):
         self.db_path = Path(db_path)
         self.conn = sqlite3.connect(str(self.db_path))
         self.conn.row_factory = sqlite3.Row

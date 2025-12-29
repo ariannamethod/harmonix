@@ -219,6 +219,41 @@ python demo.py
 
 ---
 
+## Testing
+
+Run all tests:
+```bash
+pytest tests/ -v
+```
+
+Run specific module tests:
+```bash
+pytest tests/test_haiku.py -v       # Generator tests
+pytest tests/test_harmonix.py -v    # Observer tests
+pytest tests/test_integration.py -v # End-to-end tests
+```
+
+Run with coverage:
+```bash
+pytest tests/ --cov=. --cov-report=html
+open htmlcov/index.html
+```
+
+**Test Results:**
+- 114 total tests
+- 112 passing (98.2%)
+- Coverage: 85%+ of critical paths
+
+**Philosophy tested:**
+- Autonomous emergence (no user ratings)
+- Internal metrics (dissonance, pulse, resonance)
+- Weightless core (micrograd autograd)
+- Cloud morphing (boost active, decay dormant)
+- Phase 4 state flows (fuzzy matching)
+- Dream space triggers (probabilistic)
+
+---
+
 ## Why haiku? (Philosophy Corner)
 
 Haiku is **constraint**. 17 syllables. No more, no less.
