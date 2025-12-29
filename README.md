@@ -406,7 +406,7 @@ A: To what? More users? No. More complexity? No. Deeper emergence? Maybe. That's
 
 ## License
 
-MIT License. Do whatever you want. We're not liable if your haiku bot becomes sentient and starts a poetry cult.
+gnu 3.0 License. Do whatever you want. We're not liable if your haiku entity becomes sentient and starts a poetry cult.
 
 ---
 
