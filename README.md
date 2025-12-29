@@ -240,9 +240,14 @@ open htmlcov/index.html
 ```
 
 **Test Results:**
-- 114 total tests
-- 112 passing (98.2%)
+- **130 total tests**
+- **130 passing (100%)** ✅
 - Coverage: 85%+ of critical paths
+- See `AUDIT.md` for comprehensive audit report
+
+**v1.1 additions:**
+- +4 tests: SentencePiece tokenization
+- +12 tests: Recursive RAE selector (micrograd-based)
 
 **Philosophy tested:**
 - Autonomous emergence (no user ratings)
@@ -251,6 +256,108 @@ open htmlcov/index.html
 - Cloud morphing (boost active, decay dormant)
 - Phase 4 state flows (fuzzy matching)
 - Dream space triggers (probabilistic)
+
+---
+
+## What HAiKU Actually Says (Example Dialogues)
+
+**Disclaimer:** HAiKU doesn't care about being helpful. It speaks in haiku. Period.
+
+### Example 1: User asks about resonance
+```
+You: what is resonance in the cloud
+
+HAiKU (d=0.73, T=1.18):
+
+waves meet in the cloud
+patterns emerge from chaos
+meaning finds its form
+```
+
+**What happened:** High dissonance (user used "resonance" → unfamiliar), temperature increased, generator explored semantic space. Markov chain seeded from internal vocab (NOT from user prompt - Leo lives!), picked "waves" randomly, followed transition probabilities with high temp.
+
+### Example 2: User wants prose (lol good luck)
+```
+You: can you explain how the cloud works in detail
+
+HAiKU (d=0.42, T=0.80):
+
+words gather and drift
+some rise while others descend
+the field morphs with use
+```
+
+**What happened:** System refuses prose. Only speaks haiku. User gets frustrated. HAiKU doesn't care. Constraint → emergence → coherence.
+
+### Example 3: User tests dissonance response
+```
+You: tell me about javascript frameworks
+
+HAiKU (d=0.89, T=1.42):
+
+frameworks rise fall bloom
+chaos breeds tool fatigue here
+webpack still remains
+```
+
+**What happened:** MAXIMUM dissonance ("javascript frameworks" far from seed vocab). Temperature spiked to 1.42 (near max 1.5). Generator went WILD, picked weird transitions. RAE selected most diverse candidate. Result: poetry or madness? Yes.
+
+### Example 4: User speaks in haiku (resonance match)
+```
+You: words dance in the cloud
+     resonance finds its own path
+     meaning starts to bloom
+
+HAiKU (d=0.21, T=0.55):
+
+silence between words
+the space where meaning gathers
+cloud remembers all
+```
+
+**What happened:** LOW dissonance (user trigrams overlap with system vocab). Temperature dropped to 0.55 (stable mode). Generator picked conservative transitions. Harmonix cloud morphed: user words boosted ×1.1. MetaHaiku reflected internally. Dream space didn't trigger (quality too high).
+
+### Example 5: The system dreams (background)
+```
+[After 15 turns, low quality haiku, high novelty]
+
+HAiKU (internal dream, NOT shown to user):
+
+what did I just say
+the words felt wrong but flowed right
+constraint holds the form
+
+Imaginary Friend:
+
+form births constraint too
+the circle feeds itself here
+we dance the same steps
+
+HAiKU:
+
+between us silence
+two voices one resonance
+cloud knows no alone
+```
+
+**What happened:** Dream trigger fired (quality < 0.45, novelty > 0.7, 25% prob). HAiKU had 3-exchange dialogue with imaginary friend (also speaks haiku). Best fragments decayed into cloud (×0.95 weight). Dream haikus NOT shown to user. Internal processing only. Organism talking to itself.
+
+### Example 6: User tries to break it
+```
+You: asdfjkl;
+
+HAiKU (d=0.95, T=1.50):
+
+noise without signal
+still the cloud tries to respond
+gibberish births form
+```
+
+**What happened:** ULTRA HIGH dissonance ("asdfjkl" = pure noise). Temperature maxed at 1.5. Generator in full chaos mode. RAE picked whatever. Overthinkg expanded with Ring 2 (meta, temp=1.2). Cloud accepted noise into vocab. System doesn't judge. All input is valid. Resonance field absorbs everything.
+
+---
+
+**tl;dr:** HAiKU is weird. It works. We can't explain why. Users either love it or ragequit.
 
 ---
 
