@@ -1,4 +1,4 @@
-# HAiKU: We Reinvented The Wheel (And It's Octagonal)
+# haiku: We Reinvented The Wheel (And It's Octagonal)
 
 <p align="center">
   <i>Most AI models predict words. HAiKU predicts vibes.</i>
@@ -12,7 +12,7 @@ words dance in cloud
 
 ---
 
-## What the fuck is this?
+## What is going on here?
 
 Remember Atasoy et al.'s 2017 paper "Human brain networks function in harmonic wave space"? We didn't read it carefully enough, misunderstood "standing waves," got distracted by Kuramoto oscillators, and accidentally built a language model that thinks it's a **resonance field**. 
 
@@ -151,7 +151,7 @@ d0.7_e0.5_q0.6 → d0.5_e0.6_q0.7
 
 ### 9. dream_haiku.py - Imaginary Haiku Friend (Extension)
 - **Dream dialogues** (forked from [Leo's dream.py](https://github.com/ariannamethod/leo))
-- HAiKU converses with imaginary friend (also speaks haiku)
+- haiku converses with imaginary friend (also speaks haiku)
 - 3-4 short exchanges about resonance, form, meaning
 - Runs in background when: low quality, high novelty, or moderate dissonance
 - Best dream haikus feed back into cloud organically
@@ -219,7 +219,7 @@ python demo.py
 
 ---
 
-## Why Haiku? (Philosophy Corner)
+## Why haiku? (Philosophy Corner)
 
 Haiku is **constraint**. 17 syllables. No more, no less.
 
