@@ -263,7 +263,7 @@ open htmlcov/index.html
 - **130 total tests**
 - **130 passing (100%)** ✅
 - Coverage: 85%+ of critical paths
-- See `AUDIT.md` for comprehensive audit report
+- See [`docs/AUDIT.md`](docs/AUDIT.md) for comprehensive audit report
 
 **v1.1 additions:**
 - +4 tests: SentencePiece tokenization
@@ -469,20 +469,23 @@ harmonix/
 ├── phase4_bridges.py      # State transitions (Phase 4)
 ├── dream_haiku.py         # Imaginary friend (Dream)
 ├── demo.py                # Interactive REPL
-├── train_sentencepiece.py # SentencePiece trainer (v1.1 NEW)
-├── state/
-│   └── cloud.db           # SQLite storage (moved in v1.1)
-├── shards/                # Numpy interaction history
-├── mathbrain.json         # MLP weights (haiku generator)
-├── rae_brain.json         # MLP weights (RAE selector, v1.1)
-├── haiku_sp.model         # SentencePiece model (v1.1 NEW)
-├── haiku_sp.vocab         # SentencePiece vocab (v1.1 NEW)
+├── haiku_sp.model         # SentencePiece model (v1.1)
+├── haiku_sp.vocab         # SentencePiece vocab (v1.1)
 ├── seed_words.txt         # 587 hardcoded words
-├── requirements.txt       # numpy, scipy, sentencepiece, syllables
-├── TODO_CRITICAL.md       # Philosophy checks (v1.1 NEW)
-├── AUDIT.md               # Comprehensive audit report
-├── tests/                 # 130 tests (100% passing)
-└── README.md              # You are here
+├── requirements.txt       # Dependencies
+├── README.md              # You are here
+├── docs/
+│   ├── AUDIT.md           # Comprehensive audit report
+│   └── TODO_CRITICAL.md   # Philosophy checks (v1.1)
+├── scripts/
+│   ├── train_sentencepiece.py  # SentencePiece trainer (v1.1)
+│   └── training_corpus.txt     # Training data for SP model
+├── state/
+│   ├── cloud.db           # SQLite storage
+│   ├── mathbrain.json     # MLP weights (haiku generator)
+│   └── rae_brain.json     # MLP weights (RAE selector, v1.1)
+├── shards/                # Numpy interaction history
+└── tests/                 # 130 tests (100% passing)
 ```
 
 ---

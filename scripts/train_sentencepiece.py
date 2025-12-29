@@ -7,14 +7,21 @@ Creates a SentencePiece model trained on:
 - Bootstrap haiku examples
 
 Model params:
-- vocab_size: 1000 (allows for expansion beyond 587 seed words)
+- vocab_size: 650 (based on corpus size)
 - model_type: unigram (best for variable-length tokens)
 - character_coverage: 1.0 (cover all characters in corpus)
+
+Usage:
+    python scripts/train_sentencepiece.py    # Run from repo root
 """
 
 import sentencepiece as spm
 import sqlite3
+import sys
 from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def prepare_corpus():
     """Prepare training corpus from seed words and cloud."""
@@ -68,13 +75,13 @@ def prepare_corpus():
     ]
     corpus_lines.extend(example_haikus)
 
-    # Write corpus to file
-    corpus_path = 'training_corpus.txt'
+    # Write corpus to file (in scripts/ directory)
+    corpus_path = Path(__file__).parent / 'training_corpus.txt'
     with open(corpus_path, 'w') as f:
         f.write('\n'.join(corpus_lines))
 
     print(f"Wrote {len(corpus_lines)} lines to {corpus_path}")
-    return corpus_path
+    return str(corpus_path)
 
 def train_model(corpus_path: str):
     """Train SentencePiece model."""
