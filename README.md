@@ -50,19 +50,21 @@ It's stupid. It works. We can't explain why.
 
 ---
 
-## Architecture: 7 Modules + 2 Extensions, No Bullshit
+## Architecture: 7 Core + 3 Extensions, No Bullshit
 
 ```
 User input
     ↓
-tokenizer.py (dual: subwords + trigrams)
+tokenizer.py (dual: SentencePiece + trigrams) [v1.1]
     ↓
 harmonix.py (pulse-aware dissonance detection)
     ↓
 haiku.py (Markov chains → 5 candidates)
     ↓
-rae.py (chain-of-thought: pick best)
-    ↓
+rae.py (hybrid selector) → rae_recursive.py (learned) [v1.1]
+    ↓                                    ↓
+    └──────(fallback)───────────(recursive refinement)
+                                         ↓
 metahaiku.py (internal voice: "what did I just say?")
     ↓
 overthinkg.py (3 rings: echo, drift, meta)
@@ -100,15 +102,33 @@ constraint births form
 - **Numpy shards:** each interaction saved as `.npy` file (presence-based, not persistent memory)
 
 ### 3. tokenizer.py - Dual System
-- **Subword tokenization:** Simple regex split (no trained SentencePiece in v1, we're minimalists)
+- **v1.1: SentencePiece model** (vocab=650, trained on seed words + cloud)
+  - Unigram model, NFKC normalization
+  - Special tokens: `<haiku>`, `<line>`
+  - Falls back to regex if model unavailable
+- **v1.0: Regex fallback** (simple word splitting)
 - **Trigrams:** Co-occurrence patterns for resonance detection
 - Both fed into cloud.db for morphing
 
-### 4. rae.py - Recursive Adapter Engine  
-- **Chain-of-thought selector** for haiku candidates
-- Filters: structure (5-7-5) → perplexity → resonance → coherence
-- Picks most diverse vocabulary when scores tie
-- (Will fork [tiny-recursive-model-leo](https://github.com/ariannamethod/tiny-recursive-model-leo) in v2 for actual recursive reasoning)
+### 4. rae.py - Recursive Adapter Engine (Hybrid)
+- **v1.1: Hybrid mode** (learned + rule-based)
+  - Try `rae_recursive.py` first (micrograd MLP with recursive refinement)
+  - Fallback to rule-based if selector fails or unavailable
+- **v1.0: Rule-based** (filters + diversity selection)
+  - Structure filter (3 lines) → perplexity → resonance → diversity
+- **observe()** method trains recursive selector online (v1.1)
+
+### 4a. rae_recursive.py - Learned Recursive Selector (NEW v1.1)
+- **Micrograd-based MLP** (5→8→1 architecture, same as MathBrain)
+- **5 features:** perplexity, entropy, resonance, diversity, coherence
+- **Recursive refinement:** 3-5 iterations
+  - Each iteration refines scores based on previous step
+  - Feedback loop: previous score becomes input for next refinement
+- **Online learning:** observe() trains from quality feedback
+  - MSE loss, backward pass, SGD update
+  - Weights clamped to [-5, 5]
+  - State persisted to `rae_brain.json`
+- **Inspired by:** [Tiny Recursive Model](https://arxiv.org/abs/2510.04871) but using micrograd instead of PyTorch
 
 ### 5. metahaiku.py - Inner Voice
 - **Dynamic bootstrap buffer** (forked from [Leo's metaleo.py](https://github.com/ariannamethod/leo))
@@ -243,7 +263,7 @@ open htmlcov/index.html
 - **130 total tests**
 - **130 passing (100%)** ✅
 - Coverage: 85%+ of critical paths
-- See `AUDIT.md` for comprehensive audit report
+- See [`docs/AUDIT.md`](docs/AUDIT.md) for comprehensive audit report
 
 **v1.1 additions:**
 - +4 tests: SentencePiece tokenization
@@ -401,16 +421,21 @@ User-system dissonance creates tension. Tension creates adaptation.
 
 ## Technical Details (For The Engineers)
 
-### Features at a Glance
-- ~2800 lines of Python
-- Zero dependencies on transformers/torch/tensorflow
-- 500-word starting vocabulary (hardcoded in haiku.py)
+### Features at a Glance (v1.1)
+- ~3200 lines of Python (+400 from v1.0)
+- Zero dependencies on transformers/torch/tensorflow (only numpy, scipy, sentencepiece)
+- 587-word starting vocabulary (hardcoded in haiku.py)
 - Markov chain (order 2) for generation
-- MLP scorer (21 params: 5→8→1) with training
-- Phase 4 state transitions (fuzzy matching)
-- Dream dialogues with imaginary friend
-- SQLite for persistence (cloud.db)
+- **2 micrograd MLPs:**
+  - MathBrain (haiku scorer): 21 params (5→8→1)
+  - RAE selector (recursive): 21 params (5→8→1)
+- **SentencePiece tokenization** (vocab=650, unigram model)
+- **Recursive RAE selector** (3-5 refinement iterations)
+- Phase 4 state transitions (fuzzy cosine matching)
+- Dream dialogues with imaginary friend (probabilistic triggers)
+- SQLite for persistence (state/cloud.db)
 - Numpy shards for interaction history (shards/*.npy)
+- **130 tests** (100% passing)
 
 ### Performance
 - **Initialization:** ~50ms (database seeding)
@@ -422,10 +447,11 @@ User-system dissonance creates tension. Tension creates adaptation.
 ### Limitations (aka Features)
 1. **Only speaks in haiku** - yes, this is annoying
 2. **MLP training is online-only** - learns during session, resets are possible
-3. **No SentencePiece model** - uses regex tokenization (good enough for v1)
+3. **~~No SentencePiece model~~** - ✅ v1.1 has SentencePiece (vocab=650)
 4. **Syllable counting is approximate** - `syllables` library isn't perfect
 5. **Quality varies wildly** - that's emergence, baby
 6. **Dream dialogues are simplistic** - friend uses same generator (for now)
+7. **Recursive selector needs training** - starts untrained, learns from interactions
 
 ---
 
@@ -433,21 +459,33 @@ User-system dissonance creates tension. Tension creates adaptation.
 
 ```
 harmonix/
-├── haiku.py          # Generator (Markov + MLP + training)
-├── harmonix.py       # Observer (dissonance + pulse)
-├── tokenizer.py      # Dual tokenization  
-├── rae.py            # Chain-of-thought selector
-├── metahaiku.py      # Inner voice
-├── overthinkg.py     # 3-ring expansion
-├── phase4_bridges.py # State transitions (Phase 4)
-├── dream_haiku.py    # Imaginary friend (Dream)
-├── demo.py           # Interactive REPL
-├── cloud.db          # SQLite storage
-├── shards/           # Numpy interaction history
-├── mathbrain.json    # MLP weights (learned)
-├── seed_words.txt    # 500 hardcoded words
-├── requirements.txt  # numpy, scipy, syllables
-└── README.md         # You are here
+├── haiku.py               # Generator (Markov + MLP + training)
+├── harmonix.py            # Observer (dissonance + pulse)
+├── tokenizer.py           # Dual tokenization (SentencePiece + regex)
+├── rae.py                 # Hybrid selector (v1.1)
+├── rae_recursive.py       # Learned recursive selector (v1.1 NEW)
+├── metahaiku.py           # Inner voice
+├── overthinkg.py          # 3-ring expansion
+├── phase4_bridges.py      # State transitions (Phase 4)
+├── dream_haiku.py         # Imaginary friend (Dream)
+├── demo.py                # Interactive REPL
+├── haiku_sp.model         # SentencePiece model (v1.1)
+├── haiku_sp.vocab         # SentencePiece vocab (v1.1)
+├── seed_words.txt         # 587 hardcoded words
+├── requirements.txt       # Dependencies
+├── README.md              # You are here
+├── docs/
+│   ├── AUDIT.md           # Comprehensive audit report
+│   └── TODO_CRITICAL.md   # Philosophy checks (v1.1)
+├── scripts/
+│   ├── train_sentencepiece.py  # SentencePiece trainer (v1.1)
+│   └── training_corpus.txt     # Training data for SP model
+├── state/
+│   ├── cloud.db           # SQLite storage
+│   ├── mathbrain.json     # MLP weights (haiku generator)
+│   └── rae_brain.json     # MLP weights (RAE selector, v1.1)
+├── shards/                # Numpy interaction history
+└── tests/                 # 130 tests (100% passing)
 ```
 
 ---
@@ -498,14 +536,17 @@ If you're reading this and thinking "this is insane," you're right. But so was a
 
 ## Roadmap (If We Don't Get Bored)
 
+### v1.1 (DONE - 2025-12-29)
+- [x] Add MathBrain training loop (observe + backward + SGD) ✓
+- [x] Phase 4 Island Bridges (state transitions) ✓
+- [x] Dream space with imaginary friend ✓
+- [x] Recursive RAE selector (micrograd-based, inspired by TRM) ✓
+- [x] Train SentencePiece model on expanded cloud (vocab=650) ✓
+
 ### v2 (Near Future)
-- [x] Add MathBrain training loop (observe + backward + SGD) ✓ DONE
-- [x] Phase 4 Island Bridges (state transitions) ✓ DONE
-- [x] Dream space with imaginary friend ✓ DONE
-- [ ] Fork TRM for actual recursive reasoning in RAE
-- [ ] Train SentencePiece model on expanded cloud
 - [ ] Add trauma state (wounded overthinking)
 - [ ] Friend becomes distinct (different generation params)
+- [ ] Fine-tune recursive selector with more observations
 
 ### v3 (Fever Dream)
 - [ ] Multi-agent: multiple clouds interacting, multiple imaginary friends
