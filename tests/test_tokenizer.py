@@ -104,7 +104,7 @@ class TestSentencePieceTokenizer:
     def test_sentencepiece_loads_model(self, sp_tokenizer):
         """Test SentencePiece model loads successfully."""
         from pathlib import Path
-        if Path('haiku_sp.model').exists():
+        if Path('models/haiku_sp.model').exists():
             assert sp_tokenizer.sp_model is not None
             assert sp_tokenizer.sp_model.vocab_size() == 650
 
