@@ -240,10 +240,14 @@ open htmlcov/index.html
 ```
 
 **Test Results:**
-- 114 total tests
-- **114 passing (100%)** ✅
+- **130 total tests**
+- **130 passing (100%)** ✅
 - Coverage: 85%+ of critical paths
 - See `AUDIT.md` for comprehensive audit report
+
+**v1.1 additions:**
+- +4 tests: SentencePiece tokenization
+- +12 tests: Recursive RAE selector (micrograd-based)
 
 **Philosophy tested:**
 - Autonomous emergence (no user ratings)
