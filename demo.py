@@ -28,6 +28,8 @@ from rae import RecursiveAdapterEngine
 from metahaiku import MetaHaiku
 from overthinkg import Overthinkg
 from phase4_bridges import HaikuBridges, state_id_from_metrics
+from dream_haiku import (HaikuDreamContext, DreamConfig, init_dream, 
+                         should_run_dream, run_dream_dialog, update_dream_fragments)
 
 
 def init_database():
@@ -72,6 +74,9 @@ def main():
     
     # Initialize database
     init_database()
+    
+    # Initialize dream space
+    init_dream('cloud.db')
     
     # Initialize components
     db = sqlite3.connect('cloud.db')
@@ -230,6 +235,34 @@ def main():
             
             # Overthinkg: cloud expansion with rings
             over.expand(recent_trigrams=user_trigrams)
+            
+            # Check if we should run a dream dialog
+            dream_ctx = HaikuDreamContext(
+                last_haiku=best_haiku,
+                dissonance=dissonance,
+                pulse_entropy=pulse.entropy,
+                pulse_novelty=pulse.novelty,
+                pulse_arousal=pulse.arousal,
+                quality=quality,
+                cloud_size=len(haiku_gen.vocab),
+                turn_count=turn
+            )
+            
+            if should_run_dream(dream_ctx, 'cloud.db'):
+                # Run dream dialog in background
+                dream_haikus = run_dream_dialog(haiku_gen, best_haiku, 'cloud.db')
+                
+                if os.environ.get('HAIKU_DEBUG') == '1':
+                    print(f"[Dream] Generated {len(dream_haikus)} dream haikus")
+                    for i, dh in enumerate(dream_haikus[:2]):
+                        print(f"  Dream {i+1}: {dh.replace(chr(10), ' / ')}")
+                
+                # Feed best dream haikus back into cloud
+                for dh in dream_haikus:
+                    update_dream_fragments(dh, 'cloud.db')
+                    # Also update haiku generator's chain
+                    dream_tokens = tokenizer.tokenize_dual(dh)
+                    haiku_gen.update_chain(dream_tokens['trigrams'])
             
             # Create numpy shard
             shard_data = {
