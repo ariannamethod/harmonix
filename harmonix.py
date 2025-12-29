@@ -1,14 +1,46 @@
 """
 Harmonix: Dissonance Detection + Temperature Control
 Observes user-system interaction and morphs the cloud accordingly.
+
+Forked from Leo's overthinking.py - pulse-aware dissonance detection.
 """
 
 import numpy as np
 import sqlite3
 import time
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Optional
 from scipy.sparse import csgraph
 from scipy.sparse.linalg import eigsh
+from dataclasses import dataclass
+
+
+@dataclass
+class PulseSnapshot:
+    """
+    Lightweight pulse snapshot (inspired by Leo's PresencePulse).
+    Captures the resonance state of the interaction.
+    """
+    novelty: float = 0.0
+    arousal: float = 0.0
+    entropy: float = 0.0
+    
+    @classmethod
+    def from_interaction(cls, user_trigrams: List, system_trigrams: List, 
+                        word_overlap: float) -> "PulseSnapshot":
+        """Compute pulse from interaction."""
+        # Novelty: how many new words/patterns
+        novelty = 1.0 - word_overlap if word_overlap < 1.0 else 0.0
+        
+        # Arousal: intensity of trigram mismatch
+        arousal = abs(len(user_trigrams) - len(system_trigrams)) / max(1, len(user_trigrams))
+        
+        # Entropy: diversity in combined trigrams
+        all_words = set()
+        for t in user_trigrams + system_trigrams:
+            all_words.update(t)
+        entropy = min(1.0, len(all_words) / 20.0)  # Normalize to [0,1]
+        
+        return cls(novelty, arousal, entropy)
 
 class Harmonix:
     """
@@ -83,13 +115,15 @@ class Harmonix:
         self.conn.commit()
     
     def compute_dissonance(self, user_trigrams: List[Tuple[str, str, str]], 
-                          system_trigrams: List[Tuple[str, str, str]]) -> float:
+                          system_trigrams: List[Tuple[str, str, str]]) -> Tuple[float, PulseSnapshot]:
         """
-        Compute dissonance using simplified Kuramoto-style phase difference.
-        Returns value between 0 (harmony) and 1 (dissonance).
+        Compute dissonance using pulse-aware detection (Leo-style).
+        Returns dissonance value and pulse snapshot.
+        
+        Dissonance = 1 - similarity, with pulse-aware adjustments.
         """
         if not user_trigrams or not system_trigrams:
-            return 0.5  # Neutral dissonance
+            return 0.5, PulseSnapshot()  # Neutral dissonance
         
         # Extract word sets
         user_words = set()
@@ -105,15 +139,31 @@ class Harmonix:
         union = len(user_words | system_words)
         
         if union == 0:
-            return 0.5
+            return 0.5, PulseSnapshot()
         
         similarity = intersection / union
         
-        # Dissonance is inverse of similarity
+        # Create pulse snapshot
+        pulse = PulseSnapshot.from_interaction(user_trigrams, system_trigrams, similarity)
+        
+        # Base dissonance is inverse of similarity
         dissonance = 1.0 - similarity
         
-        # Add phase-like component based on trigram structure
-        # Count exact trigram matches
+        # PULSE-AWARE ADJUSTMENTS (from Leo's overthinking.py)
+        
+        # High entropy (chaos) → increase dissonance
+        if pulse.entropy > 0.7:
+            dissonance *= 1.2
+        
+        # High arousal (emotion) → increase dissonance
+        if pulse.arousal > 0.6:
+            dissonance *= 1.15
+        
+        # High novelty (unfamiliar) → increase dissonance
+        if pulse.novelty > 0.7:
+            dissonance *= 1.1
+        
+        # Count exact trigram matches to reduce dissonance
         user_trigram_set = set(user_trigrams)
         system_trigram_set = set(system_trigrams)
         trigram_overlap = len(user_trigram_set & system_trigram_set)
@@ -122,7 +172,7 @@ class Harmonix:
             # Reduce dissonance if trigrams match
             dissonance *= 0.7
         
-        return np.clip(dissonance, 0.0, 1.0)
+        return np.clip(dissonance, 0.0, 1.0), pulse
     
     def adjust_temperature(self, dissonance: float) -> Tuple[float, float]:
         """

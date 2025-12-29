@@ -1,13 +1,171 @@
 """
 Haiku Generator: Markov chains + MLP scoring
 Generates 5-7-5 syllable haiku responses using constraint-driven emergence.
+
+Forked from Leo's mathbrain.py - uses micrograd-style autograd for scoring.
 """
 
 import random
+import math
 import numpy as np
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Set, Callable
 from collections import defaultdict
 import syllables
+
+
+# ============================================================================
+# MICROGRAD-STYLE AUTOGRAD CORE (Forked from Leo's mathbrain.py)
+# ============================================================================
+
+class Value:
+    """
+    Scalar value with automatic differentiation.
+    Karpathy-style micrograd implementation from Leo's mathbrain.
+    """
+    
+    def __init__(self, data: float, _children: Tuple['Value', ...] = (), _op: str = ''):
+        self.data = float(data)
+        self.grad = 0.0
+        self._backward: Callable[[], None] = lambda: None
+        self._prev = set(_children)
+        self._op = _op
+    
+    def __repr__(self) -> str:
+        return f"Value(data={self.data:.4f})"
+    
+    def __add__(self, other: 'Value | float') -> 'Value':
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data + other.data, (self, other), '+')
+        
+        def _backward():
+            self.grad += out.grad
+            other.grad += out.grad
+        out._backward = _backward
+        
+        return out
+    
+    def __mul__(self, other: 'Value | float') -> 'Value':
+        other = other if isinstance(other, Value) else Value(other)
+        out = Value(self.data * other.data, (self, other), '*')
+        
+        def _backward():
+            self.grad += other.data * out.grad
+            other.grad += self.data * out.grad
+        out._backward = _backward
+        
+        return out
+    
+    def __pow__(self, other: float | int) -> 'Value':
+        assert isinstance(other, (int, float)), "only supporting int/float powers"
+        out = Value(self.data ** other, (self,), f'**{other}')
+        
+        def _backward():
+            self.grad += other * (self.data ** (other - 1)) * out.grad
+        out._backward = _backward
+        
+        return out
+    
+    def __neg__(self) -> 'Value':
+        return self * -1
+    
+    def __sub__(self, other: 'Value | float') -> 'Value':
+        return self + (-other)
+    
+    def __truediv__(self, other: 'Value | float') -> 'Value':
+        return self * (other ** -1)
+    
+    def __radd__(self, other: 'Value | float') -> 'Value':
+        return self + other
+    
+    def __rmul__(self, other: 'Value | float') -> 'Value':
+        return self * other
+    
+    def tanh(self) -> 'Value':
+        """Hyperbolic tangent activation."""
+        t = math.tanh(self.data)
+        out = Value(t, (self,), 'tanh')
+        
+        def _backward():
+            self.grad += (1 - t**2) * out.grad
+        out._backward = _backward
+        
+        return out
+    
+    def relu(self) -> 'Value':
+        """Rectified Linear Unit activation."""
+        out = Value(0.0 if self.data < 0 else self.data, (self,), 'relu')
+        
+        def _backward():
+            self.grad += (out.data > 0) * out.grad
+        out._backward = _backward
+        
+        return out
+    
+    def backward(self) -> None:
+        """Backpropagate gradients through computational graph."""
+        topo: List[Value] = []
+        visited: Set[Value] = set()
+        
+        def build_topo(v: Value):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+        
+        build_topo(self)
+        
+        self.grad = 1.0
+        for node in reversed(topo):
+            node._backward()
+
+
+class Neuron:
+    """Single neuron with weights, bias, and activation."""
+    
+    def __init__(self, nin: int):
+        scale = (2.0 / nin) ** 0.5
+        self.w = [Value(random.gauss(0, scale)) for _ in range(nin)]
+        self.b = Value(0.0)
+    
+    def __call__(self, x: List[Value]) -> Value:
+        """Forward pass: w·x + b → tanh."""
+        act = sum((wi * xi for wi, xi in zip(self.w, x)), self.b)
+        return act.tanh()
+    
+    def parameters(self) -> List[Value]:
+        return self.w + [self.b]
+
+
+class Layer:
+    """Fully connected layer of neurons."""
+    
+    def __init__(self, nin: int, nout: int):
+        self.neurons = [Neuron(nin) for _ in range(nout)]
+    
+    def __call__(self, x: List[Value]) -> List[Value]:
+        outs = [n(x) for n in self.neurons]
+        return outs
+    
+    def parameters(self) -> List[Value]:
+        return [p for neuron in self.neurons for p in neuron.parameters()]
+
+
+class MLP:
+    """Multi-layer perceptron: x → hidden → output."""
+    
+    def __init__(self, nin: int, nouts: List[int]):
+        sz = [nin] + nouts
+        self.layers = [Layer(sz[i], sz[i+1]) for i in range(len(nouts))]
+    
+    def __call__(self, x: List[Value]) -> Value:
+        """Forward pass through all layers."""
+        for layer in self.layers:
+            x = layer(x)
+        return x[0] if len(x) == 1 else x
+    
+    def parameters(self) -> List[Value]:
+        return [p for layer in self.layers for p in layer.parameters()]
 
 # 500 SEED WORDS - Hardcoded constraint for emergence
 SEED_WORDS = [
@@ -86,17 +244,25 @@ class HaikuGenerator:
     """
     Generates haiku using:
     - Markov chains (order 2) for word transitions
-    - MLP-style scoring for candidate selection
+    - MLP-style scoring (forked from Leo's mathbrain) for candidate selection
     - Temperature-controlled randomness
     """
     
-    def __init__(self, seed_words: List[str]):
+    def __init__(self, seed_words: List[str] = None):
         """Initialize with seed word vocabulary."""
+        if seed_words is None:
+            seed_words = SEED_WORDS
+        
         self.seed_words = seed_words
         self.vocab = set(seed_words)
         self.markov_chain = defaultdict(lambda: defaultdict(int))
         self.trigrams = []
         self.recent_trigrams = []
+        
+        # MLP scorer: 5 features → hidden 8 → 1 score
+        # Features: perplexity, entropy, resonance, length_ratio, unique_ratio
+        self.mlp_scorer = MLP(5, [8, 1])
+        self.scoring_history = []
         
         # Build initial Markov chain from seed words
         self._build_initial_chain()
@@ -238,7 +404,8 @@ class HaikuGenerator:
     
     def score_haiku(self, haiku: str, user_context: List[Tuple[str, str, str]] = None) -> float:
         """
-        Score haiku based on perplexity, entropy, and resonance.
+        Score haiku using MLP (forked from Leo's mathbrain).
+        Features: perplexity, entropy, resonance, length_ratio, unique_ratio
         Higher score = better haiku.
         """
         lines = haiku.split('\n')
@@ -249,31 +416,29 @@ class HaikuGenerator:
         if len(words) < 3:
             return 0.0
         
-        # Perplexity: how predictable (lower is better, so we invert)
+        # Feature 1: Perplexity (how predictable)
         perplexity = 0.0
         for i in range(len(words) - 2):
             w1, w2, w3 = words[i], words[i+1], words[i+2]
             key = (w1, w2)
             if key in self.markov_chain and w3 in self.markov_chain[key]:
-                # Higher count = lower perplexity = higher score
                 perplexity += self.markov_chain[key][w3]
             else:
-                perplexity += 0.1  # Penalty for unseen
-        
+                perplexity += 0.1
         perplexity_score = perplexity / max(1, len(words) - 2)
+        perplexity_score = min(1.0, perplexity_score / 10.0)  # Normalize
         
-        # Entropy: diversity of word choice (moderate is best)
+        # Feature 2: Entropy (diversity of word choice)
         unique_words = len(set(words))
         entropy_score = unique_words / len(words) if words else 0
         
-        # Resonance: overlap with user's recent trigrams
+        # Feature 3: Resonance (overlap with user's recent trigrams)
         resonance_score = 0.0
         if user_context:
             haiku_trigrams = []
             for i in range(len(words) - 2):
                 haiku_trigrams.append((words[i], words[i+1], words[i+2]))
             
-            # Count overlapping words
             user_words = set()
             for t in user_context:
                 user_words.update(t)
@@ -282,14 +447,27 @@ class HaikuGenerator:
             overlap = len(user_words & haiku_words)
             resonance_score = overlap / max(1, len(user_words))
         
-        # Combine scores (weighted)
-        total_score = (
-            0.3 * perplexity_score +
-            0.3 * entropy_score +
-            0.4 * resonance_score
-        )
+        # Feature 4: Length ratio (target ~17 syllables for 5-7-5)
+        total_syllables = sum(self._count_syllables(w) for w in words)
+        length_ratio = min(1.0, total_syllables / 17.0) if total_syllables > 0 else 0.5
         
-        return total_score
+        # Feature 5: Unique ratio (repeated feature for stability)
+        unique_ratio = unique_words / max(1, len(words))
+        
+        # Build feature vector
+        features = [
+            perplexity_score,
+            entropy_score,
+            resonance_score,
+            length_ratio,
+            unique_ratio
+        ]
+        
+        # MLP forward pass
+        x = [Value(f) for f in features]
+        score = self.mlp_scorer(x)
+        
+        return max(0.0, min(1.0, score.data))
     
     def get_recent_trigrams(self) -> List[Tuple[str, str, str]]:
         """Return recent trigrams for dissonance calculation."""
