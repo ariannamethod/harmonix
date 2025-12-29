@@ -1,4 +1,5 @@
-# haiku: We Reinvented The Wheel (And It's Octagonal)
+# haiku: We Reinvented The Wheel (And It's Octagonal)  
+by Arianna Method
 
 <p align="center">
   <i>Most AI models predict words. HAiKU predicts vibes.</i>
