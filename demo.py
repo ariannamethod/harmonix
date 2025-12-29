@@ -27,6 +27,7 @@ from tokenizer import DualTokenizer
 from rae import RecursiveAdapterEngine
 from metahaiku import MetaHaiku
 from overthinkg import Overthinkg
+from phase4_bridges import HaikuBridges, state_id_from_metrics
 
 
 def init_database():
@@ -80,9 +81,11 @@ def main():
     rae = RecursiveAdapterEngine()
     meta = MetaHaiku(haiku_gen)
     over = Overthinkg('cloud.db')
+    bridges = HaikuBridges('cloud.db')  # Phase 4: Island Bridges
     
     # Interaction counter
     turn = 0
+    prev_state_id = None
     
     try:
         while True:
@@ -159,6 +162,38 @@ def main():
             
             quality = min(1.0, max(0.0, quality))
             
+            # Create state ID for Phase 4
+            current_state_id = state_id_from_metrics(dissonance, pulse.entropy, quality)
+            
+            # Metrics before and after
+            metrics_before = {
+                'dissonance': dissonance,
+                'entropy': pulse.entropy,
+                'novelty': pulse.novelty,
+                'arousal': pulse.arousal,
+                'quality': 0.5,  # before generation
+            }
+            
+            metrics_after = {
+                'dissonance': dissonance,
+                'entropy': pulse.entropy,
+                'novelty': pulse.novelty,
+                'arousal': pulse.arousal,
+                'quality': quality,  # after generation
+            }
+            
+            # Phase 4: Record state transition
+            bridges.record_state(
+                state_id=current_state_id,
+                metrics_before=metrics_before,
+                metrics_after=metrics_after,
+                prev_state_id=prev_state_id,
+                turn_id=f"turn_{turn}",
+                boredom=(dissonance < 0.3 and pulse.entropy < 0.4),
+                overwhelm=(dissonance > 0.8 or pulse.arousal > 0.8),
+                stuck=(quality < 0.4)
+            )
+            
             # MathBrain: observe and learn (Leo-style)
             loss = haiku_gen.observe(best_haiku, quality, user_context=user_trigrams)
             
@@ -166,6 +201,16 @@ def main():
             if os.environ.get('HAIKU_DEBUG') == '1':
                 stats = haiku_gen.get_stats()
                 print(f"[MathBrain] obs={stats['observations']}, loss={loss:.4f}, avg_loss={stats['running_loss']:.4f}")
+                
+                # Show Phase 4 suggestions
+                suggestions = bridges.suggest_next_states(current_state_id, min_count=1, max_results=3)
+                if suggestions:
+                    print(f"[Phase4] Suggested next states:")
+                    for s in suggestions:
+                        print(f"  → {s.to_state} (score={s.score:.3f}, count={s.count})")
+            
+            # Update prev_state_id for next iteration
+            prev_state_id = current_state_id
             
             # Background processes (not shown to user)
             
