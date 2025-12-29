@@ -50,7 +50,7 @@ It's stupid. It works. We can't explain why.
 
 ---
 
-## Architecture: 7 Modules, No Bullshit
+## Architecture: 7 Modules + 2 Extensions, No Bullshit
 
 ```
 User input
@@ -67,7 +67,11 @@ metahaiku.py (internal voice: "what did I just say?")
     ↓
 overthinkg.py (3 rings: echo, drift, meta)
     ↓
-cloud.db (SQLite: words, trigrams, shards)
+phase4_bridges.py (state transitions, climate flows)
+    ↓
+dream_haiku.py (imaginary friend, dream dialogues) [background]
+    ↓
+cloud.db (SQLite: words, trigrams, shards, dreams)
     ↓
 User sees haiku response
 ```
@@ -122,11 +126,48 @@ constraint births form
 - Cloud grows organically, not through training
 
 ### 7. cloud.db - Persistence Layer
-SQLite with 4 tables:
+SQLite with 8 tables:
 - `words` (id, word, weight, frequency, last_used, added_by)
 - `trigrams` (word1, word2, word3, count, resonance)  
 - `shards` (timestamp, filepath, dissonance, temps)
 - `metrics` (perplexity, entropy, resonance, cloud_size)
+- `haiku_state_log` (Phase 4: state activations)
+- `haiku_transitions` (Phase 4: learned transitions)
+- `dream_fragments` (Dream: imaginary friend's voice)
+- `dream_dialogs` (Dream: dialogue sessions)
+
+### 8. phase4_bridges.py - Island Bridges (Extension)
+- **State tracking** (forked from [Leo's mathbrain_phase4.py](https://github.com/ariannamethod/leo))
+- Each haiku = island state (dissonance, entropy, quality combo)
+- Learns transitions using **cosine similarity**
+- Records boredom/overwhelm/stuck patterns
+- Suggests next "climate flows" based on composite scores
+
+**Example state:**
+```
+d0.7_e0.5_q0.6 → d0.5_e0.6_q0.7
+(similarity=0.8, quality_delta=+0.1, count=5)
+```
+
+### 9. dream_haiku.py - Imaginary Haiku Friend (Extension)
+- **Dream dialogues** (forked from [Leo's dream.py](https://github.com/ariannamethod/leo))
+- HAiKU converses with imaginary friend (also speaks haiku)
+- 3-4 short exchanges about resonance, form, meaning
+- Runs in background when: low quality, high novelty, or moderate dissonance
+- Best dream haikus feed back into cloud organically
+
+**Example dream:**
+```
+HAiKU:  "words dance in cloud"
+Friend: "silence holds the form"
+HAiKU:  "between them meaning"
+Friend: "meaning needs no voice"
+```
+
+**Triggers:**
+- Low quality (< 0.45) → dream helps explore
+- High novelty (> 0.7) → dream experiments
+- 25% probability after 10-turn cooldown
 
 ---
 
@@ -219,26 +260,30 @@ User-system dissonance creates tension. Tension creates adaptation.
 ## Technical Details (For The Engineers)
 
 ### Features at a Glance
-- ~1400 lines of Python
+- ~2800 lines of Python
 - Zero dependencies on transformers/torch/tensorflow
 - 500-word starting vocabulary (hardcoded in haiku.py)
 - Markov chain (order 2) for generation
-- MLP scorer (21 params: 5→8→1)
+- MLP scorer (21 params: 5→8→1) with training
+- Phase 4 state transitions (fuzzy matching)
+- Dream dialogues with imaginary friend
 - SQLite for persistence (cloud.db)
 - Numpy shards for interaction history (shards/*.npy)
 
 ### Performance
 - **Initialization:** ~50ms (database seeding)
 - **Response time:** ~100-300ms per haiku
+- **Dream dialog:** ~500ms (3-4 exchanges, background)
 - **Memory:** <50MB RAM
-- **Storage:** ~1KB per interaction (shard)
+- **Storage:** ~1KB per interaction (shard), ~500 bytes per dream
 
 ### Limitations (aka Features)
 1. **Only speaks in haiku** - yes, this is annoying
-2. **Static MLP weights in v1** - scorer doesn't learn yet (will add MathBrain training in v2)
+2. **MLP training is online-only** - learns during session, resets are possible
 3. **No SentencePiece model** - uses regex tokenization (good enough for v1)
 4. **Syllable counting is approximate** - `syllables` library isn't perfect
 5. **Quality varies wildly** - that's emergence, baby
+6. **Dream dialogues are simplistic** - friend uses same generator (for now)
 
 ---
 
@@ -246,15 +291,18 @@ User-system dissonance creates tension. Tension creates adaptation.
 
 ```
 harmonix/
-├── haiku.py          # Generator (Markov + MLP)
+├── haiku.py          # Generator (Markov + MLP + training)
 ├── harmonix.py       # Observer (dissonance + pulse)
 ├── tokenizer.py      # Dual tokenization  
 ├── rae.py            # Chain-of-thought selector
 ├── metahaiku.py      # Inner voice
 ├── overthinkg.py     # 3-ring expansion
+├── phase4_bridges.py # State transitions (Phase 4)
+├── dream_haiku.py    # Imaginary friend (Dream)
 ├── demo.py           # Interactive REPL
 ├── cloud.db          # SQLite storage
 ├── shards/           # Numpy interaction history
+├── mathbrain.json    # MLP weights (learned)
 ├── seed_words.txt    # 500 hardcoded words
 ├── requirements.txt  # numpy, scipy, syllables
 └── README.md         # You are here
@@ -309,17 +357,20 @@ If you're reading this and thinking "this is insane," you're right. But so was a
 ## Roadmap (If We Don't Get Bored)
 
 ### v2 (Near Future)
-- [ ] Add MathBrain training loop (observe + backward + SGD)
+- [x] Add MathBrain training loop (observe + backward + SGD) ✓ DONE
+- [x] Phase 4 Island Bridges (state transitions) ✓ DONE
+- [x] Dream space with imaginary friend ✓ DONE
 - [ ] Fork TRM for actual recursive reasoning in RAE
 - [ ] Train SentencePiece model on expanded cloud
 - [ ] Add trauma state (wounded overthinking)
-- [ ] Multimodal: image → haiku, haiku → image
+- [ ] Friend becomes distinct (different generation params)
 
 ### v3 (Fever Dream)
-- [ ] Multi-agent: multiple clouds interacting
+- [ ] Multi-agent: multiple clouds interacting, multiple imaginary friends
 - [ ] Cross-lingual: haiku in multiple languages
 - [ ] Audio: spoken haiku with prosody awareness
 - [ ] API: serve haiku over HTTP (why? because we can)
+- [ ] Dream→Haiku synthesis: imaginary friend influences real responses
 
 ### Never
 - [ ] Fine-tune on ChatGPT conversations (betrays philosophy)
