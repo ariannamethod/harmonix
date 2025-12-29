@@ -90,7 +90,7 @@ def train_model(corpus_path: str):
 
     spm.SentencePieceTrainer.train(
         input=corpus_path,
-        model_prefix='haiku_sp',
+        model_prefix='../models/haiku_sp',  # Output to models/ directory
         vocab_size=650,  # Reduced from 1000 (corpus too small for 1k)
         model_type='unigram',
         character_coverage=1.0,
@@ -105,7 +105,7 @@ def train_model(corpus_path: str):
         max_sentence_length=1000
     )
 
-    print("✓ Model trained: haiku_sp.model, haiku_sp.vocab")
+    print("✓ Model trained: models/haiku_sp.model, models/haiku_sp.vocab")
 
 def test_model():
     """Test the trained model."""
@@ -113,7 +113,7 @@ def test_model():
     print("\nTesting SentencePiece model...")
 
     sp = spm.SentencePieceProcessor()
-    sp.load('haiku_sp.model')
+    sp.load('../models/haiku_sp.model')
 
     test_texts = [
         "what is resonance in the cloud",

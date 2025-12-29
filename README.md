@@ -463,20 +463,22 @@ harmonix/
 ├── harmonix.py            # Observer (dissonance + pulse)
 ├── tokenizer.py           # Dual tokenization (SentencePiece + regex)
 ├── rae.py                 # Hybrid selector (v1.1)
-├── rae_recursive.py       # Learned recursive selector (v1.1 NEW)
+├── rae_recursive.py       # Learned recursive selector (v1.1)
 ├── metahaiku.py           # Inner voice
 ├── overthinkg.py          # 3-ring expansion
 ├── phase4_bridges.py      # State transitions (Phase 4)
 ├── dream_haiku.py         # Imaginary friend (Dream)
 ├── demo.py                # Interactive REPL
-├── haiku_sp.model         # SentencePiece model (v1.1)
-├── haiku_sp.vocab         # SentencePiece vocab (v1.1)
-├── seed_words.txt         # 587 hardcoded words
 ├── requirements.txt       # Dependencies
 ├── README.md              # You are here
+├── data/
+│   └── seed_words.txt     # 587 hardcoded seed words
 ├── docs/
 │   ├── AUDIT.md           # Comprehensive audit report
 │   └── TODO_CRITICAL.md   # Philosophy checks (v1.1)
+├── models/
+│   ├── haiku_sp.model     # SentencePiece model (v1.1)
+│   └── haiku_sp.vocab     # SentencePiece vocab (v1.1)
 ├── scripts/
 │   ├── train_sentencepiece.py  # SentencePiece trainer (v1.1)
 │   └── training_corpus.txt     # Training data for SP model

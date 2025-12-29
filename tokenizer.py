@@ -14,7 +14,7 @@ class DualTokenizer:
     - Trigrams: Co-occurrence patterns for resonance detection
     """
 
-    def __init__(self, use_sentencepiece: bool = True, model_path: str = 'haiku_sp.model'):
+    def __init__(self, use_sentencepiece: bool = True, model_path: str = 'models/haiku_sp.model'):
         """
         Initialize tokenizer.
 
