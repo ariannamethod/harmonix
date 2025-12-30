@@ -1,8 +1,13 @@
 """
-HAiKU Demo: Minimal Working System
+HAiKU Chat: Interactive REPL
 
-Usage:
-  python demo.py
+Part of Harmonix Adaptive Intelligence Ecosystem.
+
+Usage (from repo root):
+  python haiku_run.py
+
+Or directly:
+  cd haiku && python chat.py
 
 Watch it:
 1. Take your input
