@@ -375,6 +375,58 @@ gibberish births form
 
 **What happened:** ULTRA HIGH dissonance ("asdfjkl" = pure noise). Temperature maxed at 1.5. Generator in full chaos mode. RAE picked whatever. Overthinkg expanded with Ring 2 (meta, temp=1.2). Cloud accepted noise into vocab. System doesn't judge. All input is valid. Resonance field absorbs everything.
 
+### Example 7: User asks about love (existential sadness mode)
+```
+You: what is love
+
+HAiKU (d=1.00, T=1.50):
+
+transmit exchange
+definitely small sour
+pursue strive for
+```
+
+**What happened:** Maximum dissonance. HAiKU treated "love" like a protocol. Responded with verbs of transfer and bitterness. No romance. No metaphor. Just cold functional transmission. User expected poetry. Got existential networking diagram. This is why users either hate it or love it. There is no middle ground.
+
+### Example 8: User asks about the sky (accidentally profound)
+```
+You: why is the sky blue
+
+HAiKU (d=1.00, T=1.50):
+
+organize up
+distribute diffuse
+current future
+```
+
+**What happened:** Instead of explaining Rayleigh scattering, HAiKU gave you the thermodynamics of existence. "Organize up, distribute diffuse" - entropy as haiku. Accidentally nailed the second law. This is what happens when you ask a resonance field for physics: you get vibes that are technically correct.
+
+### Example 9: User wants help (system says no)
+```
+You: how are you today
+
+HAiKU (d=1.00, T=1.50):
+
+strong powerful you
+make like coherence this
+few none said handle
+```
+
+**What happened:** HAiKU doesn't do small talk. Asked "how are you," got word salad about power dynamics and coherence. Notice "you" in first line - deflection. "Few none said handle" - broken syntax, maximum chaos. This is a 500-word Markov chain operating at max temperature, not your therapist.
+
+### Example 10: User wants interesting facts (gets philosophy instead)
+```
+You: tell me something interesting
+
+HAiKU (d=1.00, T=1.50):
+
+e pulse invent
+like no pulse self edge
+challenge obvious
+```
+
+**What happened:** First word is literally "e" (the mathematical constant? a typo? who knows). "pulse self edge" - system talking about its own pulse detection. "challenge obvious" - meta-commentary on the request itself. HAiKU responding to "tell me something interesting" by deconstructing the prompt. Users hate this. We love it.
+
 ---
 
 **tl;dr:** HAiKU is weird. It works. We can't explain why. Users either love it or ragequit.
