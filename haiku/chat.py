@@ -296,8 +296,9 @@ def main():
         cloud_size = len(haiku_gen.vocab)
         print(f"\n{turn} interactions completed.")
         print(f"Cloud size: {cloud_size} words")
-        
+
         # Cleanup
+        haiku_gen.close()  # Save Markov chain and close database
         harmonix.close()
         over.close()
         db.close()
