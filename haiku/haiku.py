@@ -426,7 +426,9 @@ class HaikuGenerator:
             self.vocab.add(w2)
             self.vocab.add(w3)
 
-        self.recent_trigrams = trigrams[-10:]  # Keep last 10 for resonance
+        # Accumulate recent trigrams (not replace!)
+        self.recent_trigrams.extend(trigrams)
+        self.recent_trigrams = self.recent_trigrams[-10:]  # Keep last 10 overall
 
         # Persist to database
         self._save_markov_chain()
