@@ -61,12 +61,17 @@ class MetaSonnet:
             reflection_seed = last_interaction.get('sonnet', '')
 
         # Generate internal sonnet with higher temperature (more exploratory)
-        # Use reflection_seed as prompt
-        internal_sonnet = self.generator.generate(
-            prompt=reflection_seed[:50],
-            max_tokens=280,
-            temperature=0.9
-        )
+        # FIX: Use empty prompt (model generates from scratch) + increase max_tokens
+        try:
+            internal_sonnet = self.generator.generate(
+                prompt="\n",  # Empty prompt (model trained for this)
+                max_tokens=800,  # Increased from 280 (need enough text after header removal)
+                temperature=0.9
+            )
+        except Exception as e:
+            # FIX: Catch generation errors
+            print(f"⚠️  MetaSonnet generation failed: {e}")
+            return ""
 
         # Format as sonnet
         from formatter import SonnetFormatter

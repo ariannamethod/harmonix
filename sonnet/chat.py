@@ -60,10 +60,11 @@ def main():
             prompt = ' '.join(prompt_words) if prompt_words else "\n"
 
             # Generate raw output (with character headers)
+            # FIX: Use empty prompt + 800 tokens + temp from range 0.7-1.2
             raw_output = generator.generate(
-                prompt=prompt,
-                max_tokens=280,
-                temperature=0.8
+                prompt="\n",  # Empty prompt (model generates from scratch)
+                max_tokens=800,  # Need enough text after header removal
+                temperature=sonnet_temp if 'sonnet_temp' in locals() else 0.8
             )
 
             # Format to clean 14-line sonnet
