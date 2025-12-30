@@ -179,7 +179,7 @@ class SonnetGenerator:
     Pure numpy inference - NO PyTorch runtime needed.
     """
 
-    def __init__(self, weights_path: str = 'shakespeare_gpt.pth',
+    def __init__(self, weights_path: str = 'state/shakespeare_gpt.npz',
                  dataset_path: str = 'shakespeare.txt'):
         self.weights_path = weights_path
         self.dataset_path = dataset_path
@@ -187,7 +187,7 @@ class SonnetGenerator:
         # Load character vocabulary
         self._load_vocab()
 
-        # Load and convert model weights
+        # Load model weights (pure numpy, NO PyTorch!)
         self._load_weights()
 
     def _load_vocab(self):
@@ -206,16 +206,15 @@ class SonnetGenerator:
         print(f"✓ Loaded vocabulary: {self.vocab_size} unique characters")
 
     def _load_weights(self):
-        """Load PyTorch weights and convert to numpy."""
-        import torch
+        """Load numpy weights from .npz archive (NO PyTorch!)."""
 
-        # Load state dict
-        state_dict = torch.load(self.weights_path, map_location='cpu')
+        # Load numpy archive
+        npz_file = np.load(self.weights_path)
 
-        # Convert all tensors to numpy
-        weights = {k: v.numpy() for k, v in state_dict.items()}
+        # Convert to dictionary
+        weights = {k: npz_file[k] for k in npz_file.files}
 
-        print(f"✓ Loaded {len(weights)} weight tensors")
+        print(f"✓ Loaded {len(weights)} weight arrays (pure numpy!)")
 
         # Build model components from weights
         self._build_model(weights)
