@@ -151,19 +151,11 @@ class SonnetHarmonix:
         return sonnet_id
 
     def _count_syllables(self, line: str) -> int:
-        """Estimate syllable count (simple heuristic)."""
-        vowels = 'aeiouy'
-        line = line.lower()
-        count = 0
-        prev_was_vowel = False
-
-        for char in line:
-            is_vowel = char in vowels
-            if is_vowel and not prev_was_vowel:
-                count += 1
-            prev_was_vowel = is_vowel
-
-        return count
+        """Estimate syllable count using formatter (more accurate)."""
+        # FIX: Use formatter's improved syllable counter
+        from formatter import SonnetFormatter
+        formatter = SonnetFormatter()
+        return formatter.count_syllables(line)
 
     def compute_dissonance(self, user_input: str, sonnet_text: str) -> Tuple[float, PulseSnapshot]:
         """
