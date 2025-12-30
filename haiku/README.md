@@ -197,7 +197,7 @@ Friend: "meaning needs no voice"
 git clone https://github.com/ariannamethod/harmonix.git
 cd harmonix
 pip install numpy scipy syllables
-python demo.py
+python chat.py
 ```
 
 That's it. No conda. No docker. No 40GB checkpoint download.
@@ -207,7 +207,7 @@ That's it. No conda. No docker. No 40GB checkpoint download.
 ## Usage
 
 ```bash
-$ python demo.py
+$ python chat.py
 
 HAiKU v1 - Resonance-Driven Haiku Generator
 ============================================================
@@ -234,7 +234,7 @@ the field morphs with use
 **Debug mode** (shows internal metahaiku):
 ```bash
 export HAIKU_DEBUG=1
-python demo.py
+python chat.py
 ```
 
 ---
@@ -520,7 +520,7 @@ harmonix/
 ├── overthinkg.py          # 3-ring expansion
 ├── phase4_bridges.py      # State transitions (Phase 4)
 ├── dream_haiku.py         # Imaginary friend (Dream)
-├── demo.py                # Interactive REPL
+├── chat.py                # Interactive REPL
 ├── requirements.txt       # Dependencies
 ├── README.md              # You are here
 ├── data/
