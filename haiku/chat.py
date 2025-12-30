@@ -22,9 +22,15 @@ Watch it:
 import sqlite3
 import sys
 import os
+from pathlib import Path
+
+# Get absolute paths relative to this file
+HAIKU_DIR = Path(__file__).parent.absolute()
+STATE_DIR = HAIKU_DIR / 'state'
+MODELS_DIR = HAIKU_DIR / 'models'
 
 # Add current directory to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, str(HAIKU_DIR))
 
 from haiku import HaikuGenerator, SEED_WORDS
 from harmonix import Harmonix, PulseSnapshot
@@ -33,17 +39,18 @@ from rae import RecursiveAdapterEngine
 from metahaiku import MetaHaiku
 from overthinkg import Overthinkg
 from phase4_bridges import HaikuBridges, state_id_from_metrics
-from dream_haiku import (HaikuDreamContext, DreamConfig, init_dream, 
+from dream_haiku import (HaikuDreamContext, DreamConfig, init_dream,
                          should_run_dream, run_dream_dialog, update_dream_fragments)
 
 
 def init_database():
     """Initialize cloud database with seed words."""
     # First, ensure harmonix initializes tables
-    harmonix_init = Harmonix('state/cloud.db')
+    db_path = str(STATE_DIR / 'cloud.db')
+    harmonix_init = Harmonix(db_path)
     harmonix_init.close()
 
-    conn = sqlite3.connect('state/cloud.db')
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
     # Check if words table has entries
@@ -80,18 +87,22 @@ def main():
     # Initialize database
     init_database()
 
+    # Paths
+    db_path = str(STATE_DIR / 'cloud.db')
+    mathbrain_path = str(STATE_DIR / 'mathbrain.json')
+
     # Initialize dream space
-    init_dream('state/cloud.db')
+    init_dream(db_path)
 
     # Initialize components
-    db = sqlite3.connect('state/cloud.db')
+    db = sqlite3.connect(db_path)
     tokenizer = DualTokenizer()
-    haiku_gen = HaikuGenerator(SEED_WORDS)
-    harmonix = Harmonix('state/cloud.db')
+    haiku_gen = HaikuGenerator(SEED_WORDS, mathbrain_path, db_path)
+    harmonix = Harmonix(db_path)
     rae = RecursiveAdapterEngine()
     meta = MetaHaiku(haiku_gen)
-    over = Overthinkg('state/cloud.db')
-    bridges = HaikuBridges('state/cloud.db')  # Phase 4: Island Bridges
+    over = Overthinkg(db_path)
+    bridges = HaikuBridges(db_path)  # Phase 4: Island Bridges
     
     # Interaction counter
     turn = 0
@@ -253,18 +264,18 @@ def main():
                 turn_count=turn
             )
             
-            if should_run_dream(dream_ctx, 'state/cloud.db'):
+            if should_run_dream(dream_ctx, db_path):
                 # Run dream dialog in background
-                dream_haikus = run_dream_dialog(haiku_gen, best_haiku, 'state/cloud.db')
-                
+                dream_haikus = run_dream_dialog(haiku_gen, best_haiku, db_path)
+
                 if os.environ.get('HAIKU_DEBUG') == '1':
                     print(f"[Dream] Generated {len(dream_haikus)} dream haikus")
                     for i, dh in enumerate(dream_haikus[:2]):
                         print(f"  Dream {i+1}: {dh.replace(chr(10), ' / ')}")
-                
+
                 # Feed best dream haikus back into cloud
                 for dh in dream_haikus:
-                    update_dream_fragments(dh, 'state/cloud.db')
+                    update_dream_fragments(dh, db_path)
                     # Also update haiku generator's chain
                     dream_tokens = tokenizer.tokenize_dual(dh)
                     haiku_gen.update_chain(dream_tokens['trigrams'])
