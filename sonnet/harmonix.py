@@ -148,6 +148,14 @@ class SonnetHarmonix:
             ''', (sonnet_id, i, line, syllable_count))
 
         self.conn.commit()
+
+        # FIX: Build vocabulary from trigrams (this was missing!)
+        words = sonnet_text.lower().split()
+        if len(words) >= 3:
+            trigrams = [(words[i], words[i+1], words[i+2])
+                       for i in range(len(words) - 2)]
+            self.update_trigrams(trigrams)
+
         return sonnet_id
 
     def _count_syllables(self, line: str) -> int:
@@ -160,6 +168,7 @@ class SonnetHarmonix:
     def compute_dissonance(self, user_input: str, sonnet_text: str) -> Tuple[float, PulseSnapshot]:
         """
         Compute dissonance between user input and generated sonnet.
+        Uses cloud vocabulary for novelty detection.
 
         Args:
             user_input: User's input text
@@ -175,10 +184,22 @@ class SonnetHarmonix:
         if not user_words or not sonnet_words:
             return 0.5, PulseSnapshot()  # Neutral
 
-        # Compute Jaccard similarity
-        user_set = set(user_words)
-        sonnet_set = set(sonnet_words)
+        # FIX: Load cloud vocabulary from trigrams
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT DISTINCT word1 FROM sonnet_trigrams UNION SELECT DISTINCT word2 FROM sonnet_trigrams UNION SELECT DISTINCT word3 FROM sonnet_trigrams')
+        cloud_vocab = set(row[0] for row in cursor.fetchall())
 
+        # Compute novelty: how many sonnet words are NEW (not in cloud)?
+        sonnet_set = set(sonnet_words)
+        if cloud_vocab:
+            new_words = sonnet_set - cloud_vocab
+            novelty = len(new_words) / len(sonnet_set) if sonnet_set else 0.0
+        else:
+            # Empty cloud → everything is novel
+            novelty = 1.0
+
+        # Compute similarity between user input and sonnet (for arousal)
+        user_set = set(user_words)
         intersection = len(user_set & sonnet_set)
         union = len(user_set | sonnet_set)
 
@@ -187,17 +208,33 @@ class SonnetHarmonix:
 
         similarity = intersection / union
 
-        # Create pulse snapshot
+        # Create pulse snapshot with cloud-aware novelty
         pulse = PulseSnapshot.from_interaction(user_words, sonnet_words, similarity)
+        # Override novelty with cloud-based value
+        pulse.novelty = novelty
 
-        # Base dissonance (inverse of similarity)
-        dissonance = 1.0 - similarity
+        # FIX: Dissonance should be PRIMARILY based on novelty (cloud unfamiliarity)
+        # Secondary: similarity to user intent
+        #
+        # Logic:
+        # - High novelty (new words) → high dissonance (exploring unknown)
+        # - Low novelty (familiar words) → low dissonance (resonance with cloud)
+        # - User intent similarity modulates slightly
 
-        # Pulse-aware adjustment
-        # High novelty → increase dissonance slightly
-        # High arousal → increase dissonance
-        pulse_adjustment = (pulse.novelty * 0.1) + (pulse.arousal * 0.1)
-        dissonance = min(1.0, dissonance + pulse_adjustment)
+        # Primary component: novelty (70% weight)
+        # Novelty ∈ [0, 1] - fraction of new words not in cloud
+        novelty_component = novelty * 0.7
+
+        # Secondary: inverse of similarity to user input (30% weight)
+        # Similarity ∈ [0, 1] - Jaccard similarity
+        intent_component = (1.0 - similarity) * 0.3
+
+        # Combined dissonance
+        dissonance = novelty_component + intent_component
+
+        # FIX: Don't use arousal for dissonance (it's not normalized 0-1)
+        # Arousal is used for pulse tracking only
+        # Keep dissonance in [0, 1] range naturally
 
         return dissonance, pulse
 
