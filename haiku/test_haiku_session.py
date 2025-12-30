@@ -9,12 +9,12 @@ Runs from repo root with paths relative to script location.
 import sys
 from pathlib import Path
 
-# Get paths relative to this script
+# Get paths relative to this script (now inside haiku/)
 SCRIPT_DIR = Path(__file__).parent.absolute()
-HAIKU_DIR = SCRIPT_DIR / 'haiku'
+HAIKU_DIR = SCRIPT_DIR  # We're already in haiku/, so HAIKU_DIR = SCRIPT_DIR
 STATE_DIR = HAIKU_DIR / 'state'
 
-# Add haiku directory to path
+# Add haiku directory to path (for imports from same directory)
 sys.path.insert(0, str(HAIKU_DIR))
 
 from haiku import HaikuGenerator, SEED_WORDS
