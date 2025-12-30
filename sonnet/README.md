@@ -1,77 +1,207 @@
-**Try it live here:**  
-👉 [https://huggingface.co/spaces/alzaemaliq/NanoGPT-Shakespeare](https://huggingface.co/spaces/alzaemaliq/NanoGPT-Shakespeare)
+# Sonnet - Shakespeare Sonnet Generator
 
-# NanoGPT-Shakespeare
+Second ипостась in Harmonix AI ecosystem.
+Generates 14-line Shakespeare sonnets using NanoGPT with pure numpy inference.
 
-This is a basic reimplementation of the "Attention Is All You Need" paper, focused on the decoder-only transformer architecture used in GPT models. The model is trained from scratch on the Tiny Shakespeare dataset using character-level tokenization.
+## Philosophy
 
-The code is written for readability and learning. It avoids high-level libraries or frameworks and builds the model components (multi-head attention, feedforward layers, positional embeddings, etc.) using raw PyTorch.
+**Gradient from HAiKU:**
+- HAiKU: 0 MB (weightless Markov) → 3-line haiku
+- **Sonnet: 3.57 MB (tiny weights) → 14-line sonnet**
+- Prose: 500 MB (small weights) → free-form prose
+- Artist: 2 GB (full weights) → any form
 
-## Features
+**Autonomy:** Each ипостась is fully autonomous. Sonnet does NOT depend on HAiKU.
+**Cascade mode:** Only connects through MetaHarmonix for multi-agent orchestration.
 
-- Decoder-only transformer (GPT-style)
-- Character-level tokenizer (custom encode/decode logic)
-- Multi-head self-attention with causal masking
-- Learned positional embeddings
-- LayerNorm and residual connections
-- Simple training loop using AdamW
-- Generates text one character at a time
+## Architecture
 
-## Model details
+### Model
+- **NanoGPT** from alzaemaliq/NanoGPT-Shakespeare
+- Character-level tokenization (65 vocab)
+- Transformer: 128 embd, 4 heads, 4 layers, 64 context
+- **Pure numpy inference** (NO PyTorch runtime after conversion)
 
-- Embedding dimension: 128
-- Number of heads: 4
-- Number of layers: 4
-- Context window (block size): 64
-- Batch size: 16
-- Dropout: 0.1
-- Training steps: 9000
+### Components
 
-## Data
+**sonnet.py** - Core generator (numpy inference engine)
+- Complete transformer implementation in numpy
+- NumpyHead, NumpyMultiHeadAttention, NumpyFeedForward
+- NumpyBlock (attention + FFN + residuals + LayerNorm)
+- Autoregressive generation with temperature sampling
 
-The model is trained on the Tiny Shakespeare dataset (a small corpus of Shakespeare text). Character-level tokenization is used instead of word or subword tokenization.
+**formatter.py** - Clean output to 14-line sonnets
+- Removes character headers (GLOUCESTER, JULIET, etc.)
+- Extracts 14 clean lines
+- Validates iambic pentameter (~10 syllables/line)
 
-## Notes
+**harmonix.py** - Observer & cloud manager
+- Pulse-aware dissonance (novelty, arousal, entropy)
+- Dynamic temperature adjustment (0.6-1.0)
+- Sonnet database (sonnets.db)
+- Pattern tracking (sonnet_trigrams table)
 
-The `train.py` file contains the full model implementation and training loop. It also includes many inline comments and side notes where I recorded my thoughts while learning and building the model. Some of these comments may be messy or unintelligible at times, as they were written in the moment during the learning process.
+**overthinkng.py** - Cloud expansion (NEW TYPO!)
+- 3 rings of thought: echo, drift, meta
+- Generates sonnet variations in background
+- Coherence filtering (threshold=0.4)
+- **Note:** "overthinkng" (ng = recursive thinking in progress!)
+  Different from HAiKU's "overthinkg" - each ипостась has unique typo!
 
-**ライブデモはこちら：**  
-👉 [https://huggingface.co/spaces/alzaemaliq/NanoGPT-Shakespeare](https://huggingface.co/spaces/alzaemaliq/NanoGPT-Shakespeare)
+**metasonnet.py** - Inner voice
+- Internal reflections (not shown to user)
+- Dynamic bootstrap buffer (Leo-style)
+- Influences future generation through cloud bias
+- Reflects on high-dissonance / high-quality interactions
 
-# NanoGPT-Shakespeare
+**chat.py** - REPL interface
+- Main user interface
+- Commands: `/stats`, `/recent`, `/best`, `/quit`
+- Automatic overthinkng expansion
+- Metasonnet reflection triggers
 
-このプロジェクトは「Attention Is All You Need」論文の基本的な再実装であり、GPTモデルで使われているデコーダ専用のトランスフォーマーアーキテクチャに焦点を当てています。  
-Tiny Shakespeareデータセットを使用し、文字単位のトークン化でゼロから学習を行っています。
+## Installation
 
-コードは学習と可読性を重視しており、高レベルのライブラリを避け、マルチヘッドアテンション、フィードフォワード層、位置埋め込みなどのモデル構成要素をPyTorchで低レベルから構築しています。
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-## 特徴
+# Convert weights (one-time, requires PyTorch)
+python scripts/convert_weights.py
 
-- デコーダ専用トランスフォーマー（GPTスタイル）
-- 文字単位のトークナイザー（独自のエンコード／デコード）
-- マルチヘッド自己注意機構（因果マスキング付き）
-- 学習された位置埋め込み
-- LayerNormと残差接続
-- AdamWによるシンプルな学習ループ
-- テキストを1文字ずつ生成
+# After conversion, PyTorch is NO LONGER NEEDED!
+```
 
-## モデル詳細
+## Usage
 
-- 埋め込み次元数：128  
-- ヘッド数：4  
-- レイヤー数：4  
-- コンテキストウィンドウ（ブロックサイズ）：64  
-- バッチサイズ：16  
-- ドロップアウト：0.1  
-- 学習ステップ数：9000
+### From repo root (bridge launcher):
+```bash
+python sonnet_run.py
+```
 
-## データ
+### From sonnet directory:
+```bash
+cd sonnet
+python chat.py
+```
 
-Tiny Shakespeare（シェイクスピアの小規模コーパス）を使用。  
-単語やサブワードではなく、文字単位のトークン化を行っています。
+## Example Interaction
 
-## 補足
+```
+You: What is love and death?
 
-`train.py` にモデルの実装と学習ループがすべて含まれています。  
-多くのインラインコメントやメモがあり、学習中に思いついたことをそのまま書き留めています。  
-そのため、雑だったり読みづらい部分があるかもしれませんがご了承ください。
+🔄 Generating sonnet...
+
+Sonnet:
+----------------------------------------------------------------------
+When winter winds do blow and summer's heat
+Doth make the flowers grow beneath our feet.
+The time is come to speak of love and woe.
+Proud mark your father's words, and let us go.
+To be or not to be, that is the question.
+Whether 'tis nobler in the mind to suffer
+The slings and arrows of outrageous fortune.
+Or to take arms against a sea of troubles.
+And by opposing end them. To die, to sleep.
+No more; and by a sleep to say we end.
+The heart-ache and the thousand natural shocks.
+That flesh is heir to: 'tis a consummation.
+Devoutly to be wished. To die, to sleep.
+To sleep, perchance to dream: ay, there's the rub.
+----------------------------------------------------------------------
+
+Dissonance: 0.823 (novelty=0.78, arousal=12.34, entropy=0.89)
+Quality: 0.80 - Valid sonnet structure
+
+💭 Generating internal reflection...
+✓ Internal sonnet generated (not shown)
+
+🔄 Running background expansion (overthinkng)...
+✓ Sonnet cloud expanded
+```
+
+## Database Schema
+
+### sonnets table
+```sql
+CREATE TABLE sonnets (
+    id INTEGER PRIMARY KEY,
+    text TEXT NOT NULL,           -- 14 lines
+    quality REAL,
+    dissonance REAL,
+    temperature REAL,
+    timestamp REAL,
+    added_by TEXT,                -- 'user', 'overthinkng_echo', 'metasonnet'
+    word_count INTEGER,
+    line_count INTEGER DEFAULT 14
+);
+```
+
+### sonnet_lines table
+```sql
+CREATE TABLE sonnet_lines (
+    id INTEGER PRIMARY KEY,
+    sonnet_id INTEGER,
+    line_num INTEGER,             -- 1-14
+    text TEXT,
+    syllable_count INTEGER        -- For iambic pentameter check
+);
+```
+
+## Files
+
+```
+sonnet/
+├── chat.py                 # REPL interface
+├── sonnet.py              # Numpy inference engine
+├── formatter.py           # Clean 14-line formatting
+├── harmonix.py            # Observer & cloud manager
+├── overthinkng.py         # Cloud expansion (typo: ng!)
+├── metasonnet.py          # Inner voice reflections
+├── shakespeare.txt        # Training dataset
+├── shakespeare_gpt.pth    # Original PyTorch weights
+├── state/
+│   ├── shakespeare_gpt.npz   # Converted numpy weights
+│   └── sonnets.db            # Sonnet cloud database
+├── scripts/
+│   └── convert_weights.py    # One-time conversion
+└── requirements.txt
+```
+
+## Gradient Philosophy
+
+```
+HAiKU (3 lines)  →  Sonnet (14 lines)  →  Prose (∞ lines)  →  Artist (any form)
+  0 MB weights       3.57 MB weights       500 MB weights      2 GB weights
+  Markov chain       NanoGPT char-level    TinyLlama          Llama 3.2 3B
+  Pure emergence     Tiny weights          Small weights      Full weights
+  Maximum constraint Structured poetry     Free-form text     Multimodal
+```
+
+## Autonomous Design
+
+**Sonnet is fully autonomous:**
+- Own requirements.txt
+- Own state/ directory (database, weights)
+- Own scripts/ (weight conversion)
+- Own README
+- Bridge launcher in root (sonnet_run.py)
+
+**No HAiKU dependency:**
+- Does NOT import from haiku/
+- Does NOT share database
+- Does NOT share vocabulary
+
+**Cascade mode:**
+- Only connects through MetaHarmonix
+- User → HAiKU → Sonnet → Prose → Artist
+- Each passes output to next
+- MetaHarmonix orchestrates flow
+
+## Next: Prose
+
+After Sonnet completes, next ипостась:
+- **Prose**: TinyLlama (500 MB)
+- Free-form text generation
+- Long-form responses
+- Bridge between poetry and full LLM

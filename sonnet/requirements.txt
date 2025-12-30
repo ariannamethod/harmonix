@@ -1,2 +1,2 @@
-streamlit
-torch
+numpy>=1.24.0
+torch>=2.0.0  # For one-time weight conversion only (scripts/convert_weights.py)
