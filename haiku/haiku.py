@@ -248,34 +248,46 @@ class HaikuGenerator:
     - Temperature-controlled randomness
     - Self-training: learns to predict quality through observation
     """
-    
-    def __init__(self, seed_words: List[str] = None, state_path: str = 'mathbrain.json'):
+
+    def __init__(self, seed_words: List[str] = None, state_path: str = 'mathbrain.json', db_path: str = 'state/cloud.db'):
         """Initialize with seed word vocabulary."""
         if seed_words is None:
             seed_words = SEED_WORDS
-        
+
         self.seed_words = seed_words
         self.vocab = set(seed_words)
         self.markov_chain = defaultdict(lambda: defaultdict(int))
         self.trigrams = []
         self.recent_trigrams = []
-        
+
+        # Database for Markov chain persistence
+        self.db_path = db_path
+        self.db_conn = None
+
         # MLP scorer: 5 features → hidden 8 → 1 score
         # Features: perplexity, entropy, resonance, length_ratio, unique_ratio
         self.mlp_scorer = MLP(5, [8, 1])
         self.scoring_history = []
-        
+
         # MathBrain training config
         self.lr = 0.01  # Learning rate
         self.observations = 0
         self.running_loss = 0.0
         self.last_loss = 0.0
         self.state_path = state_path
-        
-        # Build initial Markov chain from seed words
-        self._build_initial_chain()
-        
-        # Try to load previous state (Leo-style persistence)
+
+        # Initialize database
+        self._init_markov_db()
+
+        # Try to load previous Markov chain from database
+        if not self._load_markov_chain():
+            # No saved chain, build initial chain from seed words
+            self._build_initial_chain()
+
+        # Load recent trigrams from database
+        self._load_recent_trigrams()
+
+        # Try to load previous MLP state (Leo-style persistence)
         self._load_mathbrain_state()
     
     def _build_initial_chain(self):
@@ -284,16 +296,143 @@ class HaikuGenerator:
         for i in range(len(self.seed_words) - 2):
             w1, w2, w3 = self.seed_words[i:i+3]
             self.markov_chain[(w1, w2)][w3] += 1
-    
+
+        # Save initial chain to database
+        self._save_markov_chain()
+
+    def _init_markov_db(self):
+        """Initialize database tables for Markov chain persistence."""
+        import sqlite3
+        import os
+
+        # Ensure directory exists
+        db_dir = os.path.dirname(self.db_path)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir)
+
+        self.db_conn = sqlite3.connect(self.db_path)
+        cursor = self.db_conn.cursor()
+
+        # Markov bigrams table (for chain persistence)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS markov_bigrams (
+                word1 TEXT NOT NULL,
+                word2 TEXT NOT NULL,
+                next_word TEXT NOT NULL,
+                count INTEGER DEFAULT 1,
+                PRIMARY KEY (word1, word2, next_word)
+            )
+        ''')
+
+        # Recent trigrams table (for resonance calculation)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS recent_trigrams (
+                id INTEGER PRIMARY KEY,
+                word1 TEXT NOT NULL,
+                word2 TEXT NOT NULL,
+                word3 TEXT NOT NULL,
+                position INTEGER NOT NULL,
+                timestamp REAL NOT NULL
+            )
+        ''')
+
+        self.db_conn.commit()
+
+    def _load_markov_chain(self) -> bool:
+        """Load Markov chain from database. Returns True if loaded, False if empty."""
+        try:
+            cursor = self.db_conn.cursor()
+            cursor.execute('SELECT word1, word2, next_word, count FROM markov_bigrams')
+            rows = cursor.fetchall()
+
+            if not rows:
+                return False
+
+            # Rebuild markov_chain from database
+            self.markov_chain = defaultdict(lambda: defaultdict(int))
+            for w1, w2, next_word, count in rows:
+                self.markov_chain[(w1, w2)][next_word] = count
+                self.vocab.add(w1)
+                self.vocab.add(w2)
+                self.vocab.add(next_word)
+
+            return True
+        except Exception:
+            return False
+
+    def _save_markov_chain(self):
+        """Save Markov chain to database."""
+        try:
+            cursor = self.db_conn.cursor()
+
+            # Clear existing entries
+            cursor.execute('DELETE FROM markov_bigrams')
+
+            # Insert all transitions
+            for (w1, w2), transitions in self.markov_chain.items():
+                for next_word, count in transitions.items():
+                    cursor.execute('''
+                        INSERT INTO markov_bigrams (word1, word2, next_word, count)
+                        VALUES (?, ?, ?, ?)
+                    ''', (w1, w2, next_word, count))
+
+            self.db_conn.commit()
+        except Exception:
+            # Silent fail - saving must never break generation
+            pass
+
+    def _load_recent_trigrams(self):
+        """Load recent trigrams from database."""
+        try:
+            import time
+            cursor = self.db_conn.cursor()
+            cursor.execute('''
+                SELECT word1, word2, word3 FROM recent_trigrams
+                ORDER BY position ASC
+                LIMIT 10
+            ''')
+            rows = cursor.fetchall()
+
+            self.recent_trigrams = [(w1, w2, w3) for w1, w2, w3 in rows]
+        except Exception:
+            self.recent_trigrams = []
+
+    def _save_recent_trigrams(self):
+        """Save recent trigrams to database."""
+        try:
+            import time
+            cursor = self.db_conn.cursor()
+
+            # Clear existing entries
+            cursor.execute('DELETE FROM recent_trigrams')
+
+            # Insert recent trigrams
+            for position, (w1, w2, w3) in enumerate(self.recent_trigrams):
+                cursor.execute('''
+                    INSERT INTO recent_trigrams (word1, word2, word3, position, timestamp)
+                    VALUES (?, ?, ?, ?, ?)
+                ''', (w1, w2, w3, position, time.time()))
+
+            self.db_conn.commit()
+        except Exception:
+            # Silent fail
+            pass
+
     def update_chain(self, trigrams: List[Tuple[str, str, str]]):
-        """Update Markov chain with new trigrams."""
+        """Update Markov chain with new trigrams and persist to database."""
         for w1, w2, w3 in trigrams:
             self.markov_chain[(w1, w2)][w3] += 1
             self.vocab.add(w1)
             self.vocab.add(w2)
             self.vocab.add(w3)
-        
-        self.recent_trigrams = trigrams[-10:]  # Keep last 10 for resonance
+
+        # Accumulate recent trigrams (not replace!)
+        self.recent_trigrams.extend(trigrams)
+        self.recent_trigrams = self.recent_trigrams[-10:]  # Keep last 10 overall
+
+        # Persist to database
+        self._save_markov_chain()
+        self._save_recent_trigrams()
     
     def _count_syllables(self, word: str) -> int:
         """Count syllables in a word (with fallback heuristic)."""
@@ -656,7 +795,16 @@ class HaikuGenerator:
     def save(self) -> None:
         """Public API to save state (call on exit)."""
         self._save_mathbrain_state()
-    
+        self._save_markov_chain()
+        self._save_recent_trigrams()
+
+    def close(self):
+        """Close database connection and save state."""
+        self.save()
+        if self.db_conn:
+            self.db_conn.close()
+            self.db_conn = None
+
     def get_stats(self) -> Dict:
         """Return training statistics."""
         return {
@@ -665,4 +813,6 @@ class HaikuGenerator:
             "last_loss": self.last_loss,
             "learning_rate": self.lr,
             "num_parameters": len(self.mlp_scorer.parameters()),
+            "markov_chain_size": len(self.markov_chain),
+            "vocab_size": len(self.vocab),
         }
