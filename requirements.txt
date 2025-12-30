@@ -1,4 +1,17 @@
-numpy>=1.24.0
-scipy>=1.10.0
-sentencepiece>=0.1.99
-syllables>=1.0.7
+# Harmonix Ecosystem - Global Dependencies
+# Each ипостась has its own requirements.txt in its directory
+
+# For development/testing of the entire ecosystem
+# Individual ипостасей can be installed separately
+
+# HAiKU dependencies (see haiku/requirements.txt)
+# Sonnet dependencies (see sonnet/requirements.txt - coming soon)
+# Prose dependencies (see prose/requirements.txt - coming soon)
+
+# To install all:
+# pip install -r haiku/requirements.txt
+# pip install -r sonnet/requirements.txt  # when available
+# etc.
+
+# Or install everything at once (when all ипостасей are ready):
+# find . -name requirements.txt -exec pip install -r {} \;
