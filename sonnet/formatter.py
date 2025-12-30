@@ -46,9 +46,15 @@ class SonnetFormatter:
         if not line:
             return None
 
-        # Character header
+        # Character header - extract text AFTER colon
         if self.CHARACTER_PATTERN.match(line):
-            return None
+            # Split on colon and take text after
+            parts = line.split(':', 1)
+            if len(parts) > 1:
+                text_after = parts[1].strip()
+                if text_after:  # Only keep if there's actual text after colon
+                    return text_after
+            return None  # Just header with no text
 
         # Line starts with known character name
         first_word = line.split()[0] if line.split() else ''
@@ -61,7 +67,7 @@ class SonnetFormatter:
 
         return line
 
-    def extract_lines(self, raw_text: str, max_lines: int = 20) -> List[str]:
+    def extract_lines(self, raw_text: str, max_lines: int = 40) -> List[str]:
         """
         Extract clean lines from raw Shakespeare output.
 
