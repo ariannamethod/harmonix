@@ -255,6 +255,107 @@ class ProseHarmonix:
         else:
             return base_temp
 
+    def get_field_seed(self, mode: str = 'auto') -> str:
+        """
+        Get seed for generation from current field state.
+
+        NO SEED FROM PROMPT! Generation starts from cloud state.
+
+        Args:
+            mode: 'recent' (70%), 'trigram' (20%), 'random' (10%), or 'auto'
+
+        Returns:
+            Seed phrase from field state
+        """
+        import random
+
+        # Auto mode - probabilistic selection
+        if mode == 'auto':
+            choice = random.random()
+            if choice < 0.7:
+                mode = 'recent'
+            elif choice < 0.9:
+                mode = 'trigram'
+            else:
+                mode = 'random'
+
+        # Get seed based on mode
+        if mode == 'recent':
+            return self._get_recent_seed()
+        elif mode == 'trigram':
+            return self._get_trigram_seed()
+        else:
+            return self._get_random_seed()
+
+    def _get_recent_seed(self) -> str:
+        """Get seed from recent prose (last sentence)."""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT text FROM prose
+            ORDER BY timestamp DESC
+            LIMIT 1
+        ''')
+        result = cursor.fetchone()
+
+        if result:
+            text = result[0]
+            # Take last sentence
+            import re
+            sentences = re.split(r'[.!?]+', text)
+            sentences = [s.strip() for s in sentences if s.strip()]
+            if sentences:
+                return sentences[-1] + '.'
+
+        return "The field resonates."
+
+    def _get_trigram_seed(self) -> str:
+        """Get seed from high-resonance trigram."""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT word1, word2, word3 FROM prose_trigrams
+            WHERE resonance > 0.5
+            ORDER BY count DESC
+            LIMIT 1
+        ''')
+        result = cursor.fetchone()
+
+        if result:
+            return ' '.join(result) + '...'
+
+        return self._get_recent_seed()
+
+    def _get_random_seed(self) -> str:
+        """Get random sentence from cloud."""
+        cursor = self.conn.cursor()
+        cursor.execute('''
+            SELECT text FROM prose_sentences
+            ORDER BY RANDOM()
+            LIMIT 1
+        ''')
+        result = cursor.fetchone()
+
+        if result:
+            return result[0]
+
+        return "Words flow through the field."
+
+    def add_disturbance(self, text: str, source: str = 'user'):
+        """
+        Add user input as field disturbance (not direct prose).
+
+        This wrinkles the field but doesn't add to prose table.
+        Affects dissonance, pulse, but generation comes from field seed.
+
+        Args:
+            text: User input or cascade text
+            source: Source of disturbance
+        """
+        # Update trigrams from disturbance
+        self._update_trigrams(text)
+
+        # Could add to separate disturbances table if needed
+        # For now, trigrams capture the field effect
+
     def get_stats(self) -> Dict[str, any]:
         """
         Get prose cloud statistics.

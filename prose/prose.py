@@ -47,6 +47,7 @@ class ProseGenerator:
     def __init__(
         self,
         model_path: Optional[str] = None,
+        harmonix = None,
         n_ctx: int = 2048,
         n_threads: int = 8,
         n_gpu_layers: int = 0,
@@ -57,6 +58,7 @@ class ProseGenerator:
 
         Args:
             model_path: Path to GGUF weights (auto-downloads if not found)
+            harmonix: ProseHarmonix instance (required for field-based generation)
             n_ctx: Context window size
             n_threads: CPU threads
             n_gpu_layers: GPU layers (0 = CPU only)
@@ -75,6 +77,13 @@ class ProseGenerator:
         )
 
         print(f"[Prose] TinyLlama loaded ✓")
+
+        # Harmonix for field-based generation
+        if harmonix is None:
+            from harmonix import ProseHarmonix
+            self.harmonix = ProseHarmonix()
+        else:
+            self.harmonix = harmonix
 
     def _resolve_model_path(self, model_path: Optional[str]) -> Path:
         """
@@ -131,88 +140,133 @@ class ProseGenerator:
 
     def generate(
         self,
-        prompt: str,
+        user_input: str,
         max_tokens: int = 500,
-        temperature: float = 0.8,
+        temperature: Optional[float] = None,
         stop: Optional[list[str]] = None,
         **kwargs
     ) -> str:
         """
-        Generate free-form prose.
+        Generate prose from field state (NO SEED FROM PROMPT!).
+
+        User input wrinkles the field but doesn't seed generation.
+        Generation comes from current cloud state.
 
         Args:
-            prompt: User input
+            user_input: User's message (adds to field as disturbance)
             max_tokens: Max generation length
-            temperature: Sampling temperature
+            temperature: Override temperature (None = auto from dissonance)
             stop: Stop sequences
             **kwargs: Additional llama.cpp params
 
         Returns:
-            Generated prose text
+            Generated prose text from field state
         """
-        # Simple Q&A format (works better with TinyLlama Chat)
-        full_prompt = f"Q: {prompt}\nA:"
+        # 1. User input wrinkles the field
+        self.harmonix.add_disturbance(user_input, source='user')
 
-        # Don't use aggressive stop sequences - let max_tokens control length
-        if stop is None:
-            stop = []
+        # 2. Compute dissonance from user input
+        # (Use empty reference for now - measures novelty vs cloud)
+        dissonance, pulse = self.harmonix.compute_dissonance(user_input, "")
 
+        # 3. Get field seed (NOT from user input!)
+        field_seed = self.harmonix.get_field_seed()
+
+        # 4. Adjust temperature based on dissonance
+        if temperature is None:
+            temperature = self.harmonix.adjust_temperature(dissonance, base_temp=0.8)
+
+        # 5. Generate from field state
+        # Don't use stop sequences - let natural flow happen
         output = self.llm(
-            full_prompt,
+            field_seed,  # ← FROM CLOUD, NOT user input!
             max_tokens=max_tokens,
             temperature=temperature,
-            stop=stop if stop else None,
+            stop=None,  # No stops - let prose flow naturally
             **kwargs
         )
 
-        return output['choices'][0]['text'].strip()
+        prose_text = output['choices'][0]['text'].strip()
+
+        # 6. Add generated prose to cloud
+        self.harmonix.add_prose(
+            prose_text,
+            quality=0.5,  # Will be scored by prosebrain later
+            dissonance=dissonance,
+            temperature=temperature,
+            added_by='prose_organism'
+        )
+
+        return prose_text
 
     def generate_cascade(
         self,
         user_prompt: str,
-        haiku_output: str,
-        sonnet_output: str,
+        haiku_output: str = None,
+        sonnet_output: str = None,
         max_tokens: int = 500,
-        temperature: float = 0.8,
+        temperature: Optional[float] = None,
     ) -> str:
         """
-        Cascade mode: User + HAiKU + Sonnet → Prose
+        Cascade mode: User + HAiKU + Sonnet → Prose (FIELD-BASED!)
 
-        Prose WEAVES all three together:
-        - HAiKU essence (compressed meaning)
-        - Sonnet structure (expanded form)
-        - Own prose flow (free-form synthesis)
+        All inputs wrinkle field together.
+        Generation still comes from field state, NOT from cascade text directly.
 
-        NOT: "rephrase haiku+sonnet"
-        BUT: "resonate and expand through prose"
+        Prose RESONATES with combined field disturbances:
+        - HAiKU essence → field disturbance
+        - Sonnet structure → field disturbance
+        - User prompt → field disturbance
+        - Prose generates from MORPHED FIELD STATE
 
         Args:
             user_prompt: Original user question
-            haiku_output: HAiKU's 5-7-5 response
-            sonnet_output: Sonnet's 14-line response
+            haiku_output: HAiKU's 5-7-5 response (optional)
+            sonnet_output: Sonnet's 14-line response (optional)
             max_tokens: Max generation length
-            temperature: Sampling temperature
+            temperature: Override temperature
 
         Returns:
-            Cascaded prose output
+            Prose generated from combined field disturbances
         """
-        cascade_prompt = f"""User question: {user_prompt}
+        # 1. Add all cascade inputs as field disturbances
+        if haiku_output:
+            self.harmonix.add_disturbance(haiku_output, source='cascade_haiku')
+        if sonnet_output:
+            self.harmonix.add_disturbance(sonnet_output, source='cascade_sonnet')
+        self.harmonix.add_disturbance(user_prompt, source='cascade_user')
 
-HAiKU essence:
-{haiku_output}
+        # 2. Compute combined dissonance
+        combined_text = f"{user_prompt}\n{haiku_output or ''}\n{sonnet_output or ''}"
+        dissonance, pulse = self.harmonix.compute_dissonance(combined_text, "")
 
-Sonnet expansion:
-{sonnet_output}
+        # 3. Get field seed (from cloud, enriched by cascade disturbances)
+        field_seed = self.harmonix.get_field_seed()
 
-Now weave this into flowing prose with poetic undertones."""
+        # 4. Adjust temperature
+        if temperature is None:
+            temperature = self.harmonix.adjust_temperature(dissonance, base_temp=0.9)
 
-        # Cascade needs different stop sequences (avoid stopping on prompt's \n\n)
-        return self.generate(
-            cascade_prompt,
+        # 5. Generate from field state
+        output = self.llm(
+            field_seed,  # ← FROM FIELD, NOT cascade inputs!
             max_tokens=max_tokens,
             temperature=temperature,
-            stop=["User:", "\n\n\n"],  # Less aggressive stops
+            stop=None,  # Let prose flow
         )
+
+        prose_text = output['choices'][0]['text'].strip()
+
+        # 6. Add to cloud
+        self.harmonix.add_prose(
+            prose_text,
+            quality=0.5,
+            dissonance=dissonance,
+            temperature=temperature,
+            added_by='prose_cascade'
+        )
+
+        return prose_text
 
     def __call__(self, prompt: str, **kwargs) -> str:
         """Shorthand for generate()."""
