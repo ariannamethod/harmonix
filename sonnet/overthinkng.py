@@ -38,7 +38,7 @@ class Overthinkng:
     Each ring generates new sonnet variations.
     """
 
-    def __init__(self, db_path: str = 'state/sonnets.db'):
+    def __init__(self, db_path: str = 'cloud/sonnets.db'):
         """Initialize with database connection."""
         self.db_path = db_path
         self.conn = sqlite3.connect(db_path)
