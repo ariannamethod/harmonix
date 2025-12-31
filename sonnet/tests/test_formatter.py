@@ -334,15 +334,15 @@ Or to take arms against a sea of troubles.
 
 HAMLET: And by opposing end them. To die, to sleep.
 No more; and by a sleep to say we end.
-The heart-ache and the thousand natural shocks.
-That flesh is heir to: 'tis a consummation.
+The heavy ache and all the natural shocks.
+That flesh must bear in this mortal coil.
 
 OPHELIA: Devoutly to be wished. To die, to sleep.
-To sleep, perchance to dream: ay, there's the rub.
+To sleep, perchance to dream, ay there's the rub.
 For in that sleep of death what dreams may come.
 When we have shuffled off this mortal coil.
-Must give us pause. There's the respect.
-That makes calamity of so long life."""
+Must give us pause and make us hesitate.
+That makes calamity of long life itself."""
 
     sonnet = formatter.format(raw_output, validate_meter=False)
 
