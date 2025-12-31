@@ -33,6 +33,9 @@ mathbrain.json
 shards/*.npy
 # state/  # Temporarily tracked for testing - see how cloud.db evolves
 
+# Prose Runtime Files (model weights only - cloud data is tracked!)
+**/*.gguf  # TinyLlama and other GGUF model weights (recursive)
+
 # Unit test / coverage reports
 htmlcov/
 .tox/
