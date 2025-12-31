@@ -1,8 +1,17 @@
-# Sonnet - Shakespeare AI (ипостась #2)
+# Sonnet - Shakespeare AI (Ипостась #2)
+
+```
+   ███████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗████████╗
+   ██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝╚══██╔══╝
+   ███████╗██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗     ██║   
+   ╚════██║██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝     ██║   
+   ███████║╚██████╔╝██║ ╚████║██║ ╚████║███████╗   ██║   
+   ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝   ╚═╝   
+```
 
 **3.57 MB NanoGPT model** trained on Shakespeare, generating 14-line sonnets with pure numpy inference.
 
-Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose (500 MB) → Artist (2 GB)**
+Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose (783 MB) → Artist (2 GB)**
 
 ## Philosophy
 
