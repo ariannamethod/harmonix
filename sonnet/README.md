@@ -1,12 +1,21 @@
-# Sonnet - Shakespeare AI (ипостась #2)
+# Sonnet - Shakespeare AI (Hypostasis #2)
+
+```
+   ███████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗████████╗
+   ██╔════╝██╔═══██╗████╗  ██║████╗  ██║██╔════╝╚══██╔══╝
+   ███████╗██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗     ██║   
+   ╚════██║██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝     ██║   
+   ███████║╚██████╔╝██║ ╚████║██║ ╚████║███████╗   ██║   
+   ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝   ╚═╝   
+```
 
 **3.57 MB NanoGPT model** trained on Shakespeare, generating 14-line sonnets with pure numpy inference.
 
-Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose (500 MB) → Artist (2 GB)**
+Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose (783 MB) → Artist (2 GB)**
 
 ## Philosophy
 
-Each ипостась is **fully autonomous** with its own typo:
+Each hypostasis is **fully autonomous** with its own typo:
 - HAiKU: `overthinkg` (kg = kilograms of thought)
 - **Sonnet: `overthinkng` (ng = recursive thinking in progress)**
 - Prose: TBD

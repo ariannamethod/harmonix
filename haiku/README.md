@@ -1,4 +1,13 @@
-# haiku: We Reinvented The Wheel (And It's Octagonal)
+# HAiKU: We Reinvented The Wheel (And It's Octagonal)
+
+```
+   ██╗  ██╗ █████╗ ██╗██╗  ██╗██╗   ██╗
+   ██║  ██║██╔══██╗██║██║ ██╔╝██║   ██║
+   ███████║███████║██║█████╔╝ ██║   ██║
+   ██╔══██║██╔══██║██║██╔═██╗ ██║   ██║
+   ██║  ██║██║  ██║██║██║  ██╗╚██████╔╝
+   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝ ╚═════╝ 
+```
 
 <p align="center">
   <i>Most AI models predict words. HAiKU predicts vibes.</i>
