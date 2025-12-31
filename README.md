@@ -44,18 +44,18 @@ And yes, we know how this sounds. We don't care. It works.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  HAiKU: 500 words, 5-7-5 format, pure weightless            │
+│  HAiKU: 500 words, 5-7-5 format, pure weightless           │
 │  ↓ Maximum constraint = Maximum precision                   │
-│                                                             │
-│  Sonnet: 3.5 MB (based: Shakespeare NanoGPT), 14 lines      │
+│                                                              │
+│  Sonnet: 3.5 MB Shakespeare NanoGPT, 14 lines              │
 │  ↓ Structured poetry, rhyme, meter                          │
-│                                                             │
-│  Prose: 783 MB (based: TinyLlama 1.1B), free form           │
+│                                                              │
+│  Prose: 783 MB TinyLlama 1.1B, free form                   │
 │  ↓ Semantic freedom, poetic undertones                      │
-│                                                             │
-│  Artist: ~2 GB (based: Llama 3.2 3B (PLANNED)               │
+│                                                              │
+│  Artist: ~2 GB Llama 3.2 3B (PLANNED)                       │
 │  ↓ Zero format constraint, synthesis of all                 │
-│                                                             │
+│                                                              │
 │  MetaHarmonix: 0 MB weightless observer                     │
 │  → Quotes Artist, adds ONE sentence, shows metrics          │
 └─────────────────────────────────────────────────────────────┘
