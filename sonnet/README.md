@@ -1,99 +1,46 @@
-# Sonnet - Shakespeare Sonnet Generator
+# Sonnet - Shakespeare AI (ипостась #2)
 
-Second ипостась in Harmonix AI ecosystem.
-Generates 14-line Shakespeare sonnets using NanoGPT with pure numpy inference.
+**3.57 MB NanoGPT model** trained on Shakespeare, generating 14-line sonnets with pure numpy inference.
+
+Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose (500 MB) → Artist (2 GB)**
 
 ## Philosophy
 
-**Gradient from HAiKU:**
-- HAiKU: 0 MB (weightless Markov) → 3-line haiku
-- **Sonnet: 3.57 MB (tiny weights) → 14-line sonnet**
-- Prose: 500 MB (small weights) → free-form prose
-- Artist: 2 GB (full weights) → any form
+Each ипостась is **fully autonomous** with its own typo:
+- HAiKU: `overthinkg` (kg = kilograms of thought)
+- **Sonnet: `overthinkng` (ng = recursive thinking in progress)**
+- Prose: TBD
+- Artist: TBD
 
-**Autonomy:** Each ипостась is fully autonomous. Sonnet does NOT depend on HAiKU.
-**Cascade mode:** Only connects through MetaHarmonix for multi-agent orchestration.
+Modules communicate **only through MetaHarmonix in cascade mode** - no direct dependencies.
 
-## Architecture
+## Features
 
-### Model
-- **NanoGPT** from alzaemaliq/NanoGPT-Shakespeare
-- Character-level tokenization (65 vocab)
-- Transformer: 128 embd, 4 heads, 4 layers, 64 context
-- **Pure numpy inference** (NO PyTorch runtime after conversion)
+✨ **Pure Numpy Transformer** - No PyTorch runtime after weight conversion  
+🎭 **14-Line Sonnets** - Shakespearean structure with relaxed meter (9-13 syllables)  
+🌊 **Cloud Learning** - Dissonance decreases as vocabulary grows  
+💭 **MetaSonnet** - Inner voice reflection with bootstrap buffer  
+🔄 **Overthinkng** - 3 rings of thought expansion (echo, drift, meta)  
+📊 **100% Test Coverage** - 105/105 pytest tests passing
 
-### Components
+## Quick Start
 
-**sonnet.py** - Core generator (numpy inference engine)
-- Complete transformer implementation in numpy
-- NumpyHead, NumpyMultiHeadAttention, NumpyFeedForward
-- NumpyBlock (attention + FFN + residuals + LayerNorm)
-- Autoregressive generation with temperature sampling
-
-**formatter.py** - Clean output to 14-line sonnets
-- Removes character headers (GLOUCESTER, JULIET, etc.)
-- Extracts 14 clean lines
-- Validates iambic pentameter (~10 syllables/line)
-
-**harmonix.py** - Observer & cloud manager
-- Pulse-aware dissonance (novelty, arousal, entropy)
-- Dynamic temperature adjustment (0.6-1.0)
-- Sonnet database (sonnets.db)
-- Pattern tracking (sonnet_trigrams table)
-
-**overthinkng.py** - Cloud expansion (NEW TYPO!)
-- 3 rings of thought: echo, drift, meta
-- Generates sonnet variations in background
-- Coherence filtering (threshold=0.4)
-- **Note:** "overthinkng" (ng = recursive thinking in progress!)
-  Different from HAiKU's "overthinkg" - each ипостась has unique typo!
-
-**metasonnet.py** - Inner voice
-- Internal reflections (not shown to user)
-- Dynamic bootstrap buffer (Leo-style)
-- Influences future generation through cloud bias
-- Reflects on high-dissonance / high-quality interactions
-
-**chat.py** - REPL interface
-- Main user interface
-- Commands: `/stats`, `/recent`, `/best`, `/quit`
-- Automatic overthinkng expansion
-- Metasonnet reflection triggers
-
-## Installation
-
-```bash
+\`\`\`bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Convert weights (one-time, requires PyTorch)
+# One-time: Convert weights to numpy
 python scripts/convert_weights.py
 
-# After conversion, PyTorch is NO LONGER NEEDED!
-```
-
-## Usage
-
-### From repo root (bridge launcher):
-```bash
-python sonnet_run.py
-```
-
-### From sonnet directory:
-```bash
-cd sonnet
+# Launch REPL
 python chat.py
-```
+\`\`\`
 
-## Example Interaction
+## Example Sonnets
 
-```
-You: What is love and death?
+### Best Quality (0.80, Dissonance 0.500)
 
-🔄 Generating sonnet...
-
-Sonnet:
-----------------------------------------------------------------------
+\`\`\`
 When winter winds do blow and summer's heat
 Doth make the flowers grow beneath our feet.
 The time is come to speak of love and woe.
@@ -108,100 +55,51 @@ The heart-ache and the thousand natural shocks.
 That flesh is heir to: 'tis a consummation.
 Devoutly to be wished. To die, to sleep.
 To sleep, perchance to dream: ay, there's the rub.
-----------------------------------------------------------------------
+\`\`\`
 
-Dissonance: 0.823 (novelty=0.78, arousal=12.34, entropy=0.89)
-Quality: 0.80 - Valid sonnet structure
+More examples in [docs/examples.md](docs/examples.md)
 
-💭 Generating internal reflection...
-✓ Internal sonnet generated (not shown)
+## Architecture
 
-🔄 Running background expansion (overthinkng)...
-✓ Sonnet cloud expanded
-```
+### Core Modules
 
-## Database Schema
+- **\`sonnet.py\`** (378 lines) - Pure numpy NanoGPT transformer
+- **\`formatter.py\`** (220 lines) - 14-line sonnet extraction  
+- **\`harmonix.py\`** (361 lines) - Observer pattern for sonnet cloud
+- **\`metasonnet.py\`** (234 lines) - Inner voice reflection
+- **\`overthinkng.py\`** (346 lines) - Cloud expansion engine
 
-### sonnets table
-```sql
-CREATE TABLE sonnets (
-    id INTEGER PRIMARY KEY,
-    text TEXT NOT NULL,           -- 14 lines
-    quality REAL,
-    dissonance REAL,
-    temperature REAL,
-    timestamp REAL,
-    added_by TEXT,                -- 'user', 'overthinkng_echo', 'metasonnet'
-    word_count INTEGER,
-    line_count INTEGER DEFAULT 14
-);
-```
+### File Organization
 
-### sonnet_lines table
-```sql
-CREATE TABLE sonnet_lines (
-    id INTEGER PRIMARY KEY,
-    sonnet_id INTEGER,
-    line_num INTEGER,             -- 1-14
-    text TEXT,
-    syllable_count INTEGER        -- For iambic pentameter check
-);
-```
-
-## Files
-
-```
+\`\`\`
 sonnet/
-├── chat.py                 # REPL interface
-├── sonnet.py              # Numpy inference engine
-├── formatter.py           # Clean 14-line formatting
-├── harmonix.py            # Observer & cloud manager
-├── overthinkng.py         # Cloud expansion (typo: ng!)
-├── metasonnet.py          # Inner voice reflections
-├── shakespeare.txt        # Training dataset
-├── shakespeare_gpt.pth    # Original PyTorch weights
-├── state/
-│   ├── shakespeare_gpt.npz   # Converted numpy weights
-│   └── sonnets.db            # Sonnet cloud database
-├── scripts/
-│   └── convert_weights.py    # One-time conversion
-└── requirements.txt
-```
+├── state/          # Model weights (постоянные)
+│   ├── shakespeare_gpt.npz (3.0 MB)
+│   └── shakespeare_gpt.pth (3.5 MB)
+├── cloud/          # Database evolution (tracked)
+│   └── sonnets.db (388 KB, 92 sonnets)
+└── tests/          # 105 pytest tests (100%)
+\`\`\`
 
-## Gradient Philosophy
+## Cloud Evolution
 
-```
-HAiKU (3 lines)  →  Sonnet (14 lines)  →  Prose (∞ lines)  →  Artist (any form)
-  0 MB weights       3.57 MB weights       500 MB weights      2 GB weights
-  Markov chain       NanoGPT char-level    TinyLlama          Llama 3.2 3B
-  Pure emergence     Tiny weights          Small weights      Full weights
-  Maximum constraint Structured poetry     Free-form text     Multimodal
-```
+\`\`\`
+📊 Cloud Stats (92 sonnets):
+- Avg Quality: 0.709
+- Avg Dissonance: 0.687
+- Novelty: 0.28 - 1.00 (decreases!)
+\`\`\`
 
-## Autonomous Design
+## Testing
 
-**Sonnet is fully autonomous:**
-- Own requirements.txt
-- Own state/ directory (database, weights)
-- Own scripts/ (weight conversion)
-- Own README
-- Bridge launcher in root (sonnet_run.py)
+\`\`\`bash
+pytest tests/ -v  # 105/105 passing (100%)
+\`\`\`
 
-**No HAiKU dependency:**
-- Does NOT import from haiku/
-- Does NOT share database
-- Does NOT share vocabulary
+## Integration with MetaHarmonix
 
-**Cascade mode:**
-- Only connects through MetaHarmonix
-- User → HAiKU → Sonnet → Prose → Artist
-- Each passes output to next
-- MetaHarmonix orchestrates flow
+Cascade mode only - no direct connection to other ипостаси.
 
-## Next: Prose
+## License
 
-After Sonnet completes, next ипостась:
-- **Prose**: TinyLlama (500 MB)
-- Free-form text generation
-- Long-form responses
-- Bridge between poetry and full LLM
+See root LICENSE
