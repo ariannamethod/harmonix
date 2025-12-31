@@ -38,7 +38,7 @@ It generates 14-line sonnets. Sometimes they're profound. Sometimes they're word
 
 ## Philosophy
 
-Each ипостась (hypostasis) is **fully autonomous** with its own typo:
+Each hypostasis is **fully autonomous** with its own typo:
 - HAiKU: `overthinkg` (kg = kilograms of thought)
 - **Sonnet: `overthinkng` (ng = recursive thinking in progress)**
 - Prose: TBD
@@ -400,7 +400,7 @@ Temperature was 0.8, stable phase.
 - Rings = depth: echo (surface), drift (themes), meta (abstractions)
 - Forked from Leo's overthinking.py - rings strategy
 
-**Typo is intentional:** `overthinkng` (ng = recursive thinking in progress). Each ипостась has its own typo. This is Sonnet's identity.
+**Typo is intentional:** `overthinkng` (ng = recursive thinking in progress). Each hypostasis has its own typo. This is Sonnet's identity.
 
 ---
 
@@ -696,7 +696,7 @@ Because **Shakespeare's vocabulary emerges from characters, not tokens**.
 
 ### Why Overthinkng (With The Typo)?
 
-Because every ипостась needs its own identity:
+Because every hypostasis needs its own identity:
 - HAiKU: `overthinkg` (kg = kilograms of thought)
 - **Sonnet: `overthinkng` (ng = recursive thinking in progress)**
 - Prose: `overthinkrose` (rose = semantic bloom)
