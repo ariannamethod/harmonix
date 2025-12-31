@@ -96,7 +96,7 @@ These modules enable higher-level creativity and semantic understanding while ma
 
 \`\`\`
 sonnet/
-├── state/          # Model weights (постоянные)
+├── state/          # Model weights
 │   ├── shakespeare_gpt.npz (3.0 MB)
 │   └── shakespeare_gpt.pth (3.5 MB)
 ├── cloud/          # Database evolution (tracked)
@@ -132,7 +132,7 @@ Once in the REPL, you can use these commands to interact with the emergent layer
 
 ## Integration with MetaHarmonix
 
-Cascade mode only - no direct connection to other ипостаси.
+Cascade mode only - no direct connection to other hypostases.
 
 ## License
 
