@@ -4,7 +4,7 @@
 
 ## Why?
 
-**Testing Prose without local weights requires an API wrapper.**
+Олег сказал: "нам тупо необходим хаггенфейс апи враппер, иначе хуй мы сможем тестить ее вне дома"
 
 Local weights (783 MB) are not always available:
 - Testing in web Claude Code
