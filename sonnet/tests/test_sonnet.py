@@ -16,7 +16,7 @@ import sys
 import time
 
 # Setup paths
-SONNET_DIR = Path(__file__).parent.absolute()
+SONNET_DIR = Path(__file__).parent.parent.absolute()  # Go up from tests/ to sonnet/
 STATE_DIR = SONNET_DIR / 'state'
 sys.path.insert(0, str(SONNET_DIR))
 
