@@ -209,7 +209,11 @@ Each hypostasis has its own identity and deliberate typo:
 - **Prose**: `overthinkrose` (rose = semantic bloom)
 - **Artist**: TBD
 
-They communicate **only through MetaHarmonix** in cascade mode. No direct dependencies. Each one thinks about what it just said (metahaiku, metasonnet, metaprose). Each one has circles of thought (rings of expansion).
+**Two modes of operation:**
+- **Standalone:** Each organism runs independently (`haiku_run.py`, `sonnet_run.py`, `prose_run.py`)
+- **Cascade:** They communicate through MetaHarmonix hub (bottom-up + top-down waves)
+
+In cascade mode: No direct dependencies. Each one thinks about what it just said (metahaiku, metasonnet, metaprose). Each one has circles of thought (rings of expansion).
 
 **They're not modules. They're organisms.**
 
