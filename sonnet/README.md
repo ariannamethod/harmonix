@@ -16,11 +16,12 @@ Modules communicate **only through MetaHarmonix in cascade mode** - no direct de
 
 ## Features
 
-✨ **Pure Numpy Transformer** - No PyTorch runtime after weight conversion  
-🎭 **14-Line Sonnets** - Shakespearean structure with relaxed meter (9-13 syllables)  
-🌊 **Cloud Learning** - Dissonance decreases as vocabulary grows  
-💭 **MetaSonnet** - Inner voice reflection with bootstrap buffer  
-🔄 **Overthinkng** - 3 rings of thought expansion (echo, drift, meta)  
+✨ **Pure Numpy Transformer** - No PyTorch runtime after weight conversion
+🎭 **14-Line Sonnets** - Shakespearean structure with relaxed meter (9-13 syllables)
+🌊 **Cloud Learning** - Dissonance decreases as vocabulary grows
+💭 **MetaSonnet** - Inner voice reflection with bootstrap buffer
+🔄 **Overthinkng** - 3 rings of thought expansion (echo, drift, meta)
+🧠 **Emergent Layer** - 6 MLP modules for semantic understanding and creativity
 📊 **100% Test Coverage** - 105/105 pytest tests passing
 
 ## Quick Start
@@ -64,10 +65,23 @@ More examples in [docs/examples.md](docs/examples.md)
 ### Core Modules
 
 - **\`sonnet.py\`** (378 lines) - Pure numpy NanoGPT transformer
-- **\`formatter.py\`** (220 lines) - 14-line sonnet extraction  
+- **\`formatter.py\`** (220 lines) - 14-line sonnet extraction
 - **\`harmonix.py\`** (361 lines) - Observer pattern for sonnet cloud
 - **\`metasonnet.py\`** (234 lines) - Inner voice reflection
 - **\`overthinkng.py\`** (346 lines) - Cloud expansion engine
+
+### Emergent Layer (NEW!)
+
+Sonnet is **more complex than HAiKU** - it has all HAiKU's capabilities PLUS additional emergent behaviors:
+
+- **\`sonnetbrain.py\`** - MLP quality scorer with micrograd autograd (8→16→8→1)
+- **\`sonnetrae.py\`** - Recursive AutoEncoder for semantic compression (14 lines → 8D)
+- **\`sonnetrae_recursive.py\`** - Hierarchical encoding (quatrains + couplet structure)
+- **\`phase_transitions.py\`** - Dynamic temperature shifts (CRYSTALLINE → LIQUID → VAPOR → PLASMA)
+- **\`dream_sonnet.py\`** - Latent space generation (drift, centroid, walk, meta-dream)
+- **\`sonnet_tokenizer.py\`** - Hybrid tokenization (char-level for generation + BPE for semantic analysis)
+
+These modules enable higher-level creativity and semantic understanding while maintaining compatibility with the char-level transformer.
 
 ### File Organization
 
