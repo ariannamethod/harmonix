@@ -284,8 +284,10 @@ class SonnetGenerator:
         print(f"✓ Built {N_LAYER} transformer blocks with {N_HEAD} heads each")
 
     def encode(self, text: str) -> List[int]:
-        """Encode text to token indices."""
-        return [self.char_to_idx[c] for c in text]
+        """Encode text to token indices. Unknown chars replaced with space."""
+        # Get space index as fallback for unknown chars
+        space_idx = self.char_to_idx.get(' ', 0)
+        return [self.char_to_idx.get(c, space_idx) for c in text]
 
     def decode(self, indices: List[int]) -> str:
         """Decode token indices to text."""

@@ -328,7 +328,7 @@ def test_best_with_varying_quality(harmonix):
         sonnet = "\n".join([f"Sonnet {i} line {j}" for j in range(14)])
         harmonix.add_sonnet(sonnet, quality=q)
 
-    best = harmonix.get_best_sonnets(limit=2, min_quality=0.7)
+    best = harmonix.get_best_sonnets(limit=3, min_quality=0.7)
 
     # Should get quality >= 0.7: 0.8, 0.9, 0.7
     assert len(best) == 3

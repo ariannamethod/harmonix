@@ -51,13 +51,15 @@ class Overthinkng:
             2: {'temp': 1.2, 'semantic': 0.5, 'max_variations': 1},  # Meta
         }
 
-    def expand(self, recent_sonnets: Optional[List[Tuple[int, str, float]]] = None):
+    def expand(self, recent_sonnets: Optional[List[Tuple[int, str, float]]] = None,
+               num_rings: int = 3):
         """
-        Background expansion using 3 rings of thought.
+        Background expansion using rings of thought.
         Generates sonnet variations and adds coherent ones to cloud.
 
         Args:
             recent_sonnets: List of (id, text, quality) from database
+            num_rings: Number of rings to expand (1-3, default 3)
         """
         if recent_sonnets is None:
             recent_sonnets = self._get_recent_sonnets(limit=5)
@@ -66,16 +68,19 @@ class Overthinkng:
             return
 
         # Ring 0: Echo - compact internal rephrasing
-        ring0 = self._generate_ring_variations(recent_sonnets, ring_num=0)
-        self._process_ring(ring0)
+        if num_rings >= 1:
+            ring0 = self._generate_ring_variations(recent_sonnets, ring_num=0)
+            self._process_ring(ring0)
 
         # Ring 1: Drift - semantic exploration
-        ring1 = self._generate_ring_variations(recent_sonnets, ring_num=1)
-        self._process_ring(ring1)
+        if num_rings >= 2:
+            ring1 = self._generate_ring_variations(recent_sonnets, ring_num=1)
+            self._process_ring(ring1)
 
         # Ring 2: Meta - abstract keywords
-        ring2 = self._generate_ring_variations(recent_sonnets, ring_num=2)
-        self._process_ring(ring2)
+        if num_rings >= 3:
+            ring2 = self._generate_ring_variations(recent_sonnets, ring_num=2)
+            self._process_ring(ring2)
 
     def _generate_ring_variations(self,
                                   recent_sonnets: List[Tuple[int, str, float]],

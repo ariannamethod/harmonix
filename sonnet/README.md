@@ -22,7 +22,7 @@ Modules communicate **only through MetaHarmonix in cascade mode** - no direct de
 💭 **MetaSonnet** - Inner voice reflection with bootstrap buffer
 🔄 **Overthinkng** - 3 rings of thought expansion (echo, drift, meta)
 🧠 **Emergent Layer** - 6 MLP modules for semantic understanding and creativity
-📊 **100% Test Coverage** - 105/105 pytest tests passing
+📊 **100% Test Coverage** - 133/133 pytest tests passing
 
 ## Quick Start
 
@@ -107,8 +107,19 @@ sonnet/
 ## Testing
 
 \`\`\`bash
-pytest tests/ -v  # 105/105 passing (100%)
+pytest tests/ -v  # 133/133 passing (100%)
 \`\`\`
+
+## Emergent Layer Commands
+
+Once in the REPL, you can use these commands to interact with the emergent layer:
+
+- **`/phase`** - Show current phase state (CRYSTALLINE/LIQUID/VAPOR/PLASMA)
+- **`/dream <mode>`** - Generate latent space dreams (modes: drift, walk, centroid)
+- **`/brain <sonnet_id>`** - Show SonnetBrain quality score breakdown for a specific sonnet
+- **`/stats`** - Show cloud statistics
+- **`/recent`** - Show recent sonnets
+- **`/best`** - Show best quality sonnets
 
 ## Integration with MetaHarmonix
 

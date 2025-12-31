@@ -20,7 +20,7 @@ from sonnet import SonnetGenerator
 from formatter import SonnetFormatter
 
 
-def test_temperature_range(temp: float, num_samples: int = 3):
+def generate_at_temperature(temp: float, num_samples: int = 3):
     """Generate sonnets at specific temperature."""
 
     print(f"\n{'='*70}")
@@ -102,7 +102,7 @@ def compare_ranges():
     print("="*70)
 
     for temp in range1_temps:
-        results = test_temperature_range(temp, num_samples=3)
+        results = generate_at_temperature(temp, num_samples=3)
         range1_results.extend(results)
 
     # Range 2: Higher (0.7-1.2)
@@ -114,7 +114,7 @@ def compare_ranges():
     print("="*70)
 
     for temp in range2_temps:
-        results = test_temperature_range(temp, num_samples=3)
+        results = generate_at_temperature(temp, num_samples=3)
         range2_results.extend(results)
 
     # Analysis
