@@ -1,2 +1,6 @@
 numpy>=1.24.0
 torch>=2.0.0  # For one-time weight conversion only (scripts/convert_weights.py)
+
+# Async dependencies
+aiosqlite>=0.22.1
+pytest-asyncio>=1.3.0
