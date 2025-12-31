@@ -74,6 +74,9 @@ venv.bak/
 *.swo
 *~
 
+# Claude Code workspace (credentials, internal notes)
+.claude/
+
 # OS
 .DS_Store
 Thumbs.db
