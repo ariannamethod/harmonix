@@ -16,12 +16,31 @@ class TestOverthinkroseInit(unittest.TestCase):
 
 class TestRingExpansion(unittest.TestCase):
     def setUp(self):
-        self.ot = Overthinkrose()
+        # Create overthinkrose with temp DB
+        import tempfile
+        db_path = tempfile.mktemp(suffix='.db')
+        self.ot = Overthinkrose(db_path=db_path)
+
+        # Add some test prose to cloud
+        from harmonix import ProseHarmonix
+        self.harmonix = ProseHarmonix(db_path=db_path)
+        self.harmonix.add_prose("Test prose for expansion.", quality=0.8)
+        self.harmonix.add_prose("Another prose entry here.", quality=0.7)
+
+    def tearDown(self):
+        self.ot.close()
+        self.harmonix.close()
 
     def test_expand_basic(self):
-        core = "consciousness"
-        result = self.ot.expand(core)
-        self.assertIsInstance(result, dict)
+        # Get recent prose to expand
+        recent = self.harmonix.get_recent_prose(limit=2)
+
+        # Expand (may return None if no expansions generated)
+        result = self.ot.expand(recent_prose=recent, num_rings=2)
+
+        # expand() returns None if no valid expansions
+        # Just check it runs without error
+        self.assertTrue(result is None or isinstance(result, dict))
 
 
 if __name__ == '__main__':

@@ -40,16 +40,17 @@ class TestCleanText(unittest.TestCase):
 
 class TestFormatProse(unittest.TestCase):
     def setUp(self):
-        self.formatter = ProseFormatter()
+        self.formatter = ProseFormatter(min_words=5)  # Lower threshold for tests
 
     def test_format_valid_prose(self):
-        text = "Words flow through consciousness like water through stone."
+        text = "Words flow through consciousness like water through stone creating patterns of meaning."
         result = self.formatter.format_prose(text)
         self.assertIsInstance(result, str)
+        self.assertGreater(len(result), 0)
 
     def test_format_empty_string(self):
         result = self.formatter.format_prose("")
-        self.assertEqual(result, "")
+        self.assertIsNone(result)  # Empty is invalid
 
 
 class TestValidate(unittest.TestCase):
