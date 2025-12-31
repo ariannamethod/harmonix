@@ -1,4 +1,4 @@
-# Sonnet - Shakespeare AI (Ипостась #2)
+# Sonnet - Shakespeare AI (Hypostasis #2)
 
 ```
    ███████╗ ██████╗ ███╗   ██╗███╗   ██╗███████╗████████╗
@@ -15,7 +15,7 @@ Part of the Harmonix AI gradient: **HAiKU (0 MB) → Sonnet (3.57 MB) → Prose 
 
 ## Philosophy
 
-Each ипостась is **fully autonomous** with its own typo:
+Each hypostasis is **fully autonomous** with its own typo:
 - HAiKU: `overthinkg` (kg = kilograms of thought)
 - **Sonnet: `overthinkng` (ng = recursive thinking in progress)**
 - Prose: TBD
