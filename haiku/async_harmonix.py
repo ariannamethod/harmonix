@@ -350,6 +350,19 @@ class AsyncHarmonix:
 
             await self.conn.commit()
 
+    async def _get_cloud_size_unlocked(self) -> int:
+        """
+        Internal: Get cloud size WITHOUT acquiring lock.
+        Caller must hold lock!
+
+        Returns:
+            Number of words in cloud
+        """
+        cursor = await self.conn.cursor()
+        await cursor.execute('SELECT COUNT(*) FROM words')
+        row = await cursor.fetchone()
+        return row[0] if row else 0
+
     async def get_cloud_size(self) -> int:
         """
         Get current number of words in cloud.
@@ -360,10 +373,7 @@ class AsyncHarmonix:
             Number of words in cloud
         """
         async with self._field_lock:  # 🔒 Atomic read
-            cursor = await self.conn.cursor()
-            await cursor.execute('SELECT COUNT(*) FROM words')
-            row = await cursor.fetchone()
-            return row[0] if row else 0
+            return await self._get_cloud_size_unlocked()
 
     async def record_metrics(self, perplexity: float, entropy: float, resonance: float):
         """
@@ -378,7 +388,7 @@ class AsyncHarmonix:
         """
         async with self._field_lock:  # 🔒 Atomic metrics record
             cursor = await self.conn.cursor()
-            cloud_size = await self.get_cloud_size()
+            cloud_size = await self._get_cloud_size_unlocked()  # Internal call (lock already held!)
 
             await cursor.execute('''
                 INSERT INTO metrics (perplexity, entropy, resonance, cloud_size)

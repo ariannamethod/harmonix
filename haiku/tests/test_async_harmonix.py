@@ -509,7 +509,8 @@ class TestConcurrentOperations:
             # Verify field state is consistent (no corruption)
             stats = await harmonix.get_stats()
             assert stats['trigram_count'] > 0
-            assert stats['word_count'] > 0
+            # Note: compute_dissonance only adds trigrams, not words
+            # Words are added by morph_cloud()
 
     @pytest.mark.asyncio
     async def test_concurrent_cloud_morphs(self, tmp_path):
