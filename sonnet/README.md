@@ -275,40 +275,338 @@ To sleep, perchance to dream: ay, there's the rub.
 
 More examples in [docs/examples.md](docs/examples.md)
 
-## Architecture
+## Architecture: The Complete System
 
-### Core Modules
+Sonnet is more than "Shakespeare NanoGPT." It's a **multi-layered cognitive architecture** with:
+- **Core generation** (transformer + formatter)
+- **Observer system** (cloud + dissonance)
+- **Emergent intelligence** (6 MLP modules)
+- **Internal metabolism** (meta-reflection + expansion)
 
-- **\`sonnet.py\`** (378 lines) - Pure numpy NanoGPT transformer
-- **\`formatter.py\`** (220 lines) - 14-line sonnet extraction
-- **\`harmonix.py\`** (361 lines) - Observer pattern for sonnet cloud
-- **\`metasonnet.py\`** (234 lines) - Inner voice reflection
-- **\`overthinkng.py\`** (346 lines) - Cloud expansion engine
+### Why These Modules Exist
 
-### Emergent Layer (NEW!)
+Each module serves a specific purpose in creating an autonomous Shakespeare organism:
 
-Sonnet is **more complex than HAiKU** - it has all HAiKU's capabilities PLUS additional emergent behaviors:
+1. **Generation** - Produces raw text from weights
+2. **Formatting** - Structures chaos into 14-line sonnets
+3. **Observation** - Measures resonance between user and system
+4. **Reflection** - Internal awareness ("what did I just say?")
+5. **Expansion** - Grows vocabulary through background thinking
+6. **Intelligence** - Learns what makes a good sonnet
+7. **Dreaming** - Explores semantic space when awake generation isn't enough
 
-- **\`sonnetbrain.py\`** - MLP quality scorer with micrograd autograd (8→16→8→1)
-- **\`sonnetrae.py\`** - Recursive AutoEncoder for semantic compression (14 lines → 8D)
-- **\`sonnetrae_recursive.py\`** - Hierarchical encoding (quatrains + couplet structure)
-- **\`phase_transitions.py\`** - Dynamic temperature shifts (CRYSTALLINE → LIQUID → VAPOR → PLASMA)
-- **\`dream_sonnet.py\`** - Latent space generation (drift, centroid, walk, meta-dream)
-- **\`sonnet_tokenizer.py\`** - Hybrid tokenization (char-level for generation + BPE for semantic analysis)
+---
 
-These modules enable higher-level creativity and semantic understanding while maintaining compatibility with the char-level transformer.
+## Core Modules (5)
 
-### File Organization
+### 1. `sonnet.py` (386 lines) - The Generator
 
-\`\`\`
+**What it does:**
+- Pure numpy NanoGPT transformer (no PyTorch at runtime)
+- Character-level generation (vocab=65: a-z, A-Z, punctuation)
+- Context window: 64 characters
+- Architecture: 4 layers, 4 heads, 128 embedding dim
+
+**Why it exists:**
+- To generate raw Shakespeare-style text from 3.57 MB of weights
+- Character-level allows phonetic creativity ("wetch", "privince")
+- Numpy-only means no framework dependencies after training
+
+**Key innovation:** Converts PyTorch weights to numpy once, then pure matrix math for inference. Karpathy's vision of understanding transformers by reimplementing simply.
+
+---
+
+### 2. `formatter.py` (304 lines) - The Sculptor
+
+**What it does:**
+- Cleans raw output (removes "GLOUCESTER:", "JULIET:" character headers)
+- Extracts exactly 14 lines from transformer chaos
+- Validates meter (9-13 syllables per line, relaxed from strict 10)
+- Checks structure (no leftover character names)
+
+**Why it exists:**
+- Transformer generates Shakespeare plays, not sonnets
+- Need to extract sonnet-shaped text from dialogue-heavy output
+- Quality control: ensure output is actually a sonnet
+
+**Key insight:** Constraint applied AFTER generation, not during. Let the model dream freely, then shape the dream.
+
+---
+
+### 3. `harmonix.py` (390 lines) - The Observer
+
+**What it does:**
+- Computes **dissonance** between user input and generated sonnet
+- Measures **pulse** (novelty, arousal, entropy)
+- Adjusts generation temperature based on dissonance
+- Maintains **sonnet cloud** (SQLite database of all generated sonnets)
+- Tracks trigrams, quality metrics, timestamps
+
+**Why it exists:**
+- **Dissonance drives adaptation**: High dissonance → explore (temp ↑). Low dissonance → stabilize (temp ↓)
+- Cloud provides memory: Sonnet remembers what it generated, learns patterns
+- Organism needs feedback loop: generation → observation → adjustment
+
+**Database schema:**
+```sql
+sonnets (id, sonnet_text, quality, dissonance, novelty, timestamp)
+trigrams (word1, word2, word3, frequency, resonance)
+metrics (avg_quality, avg_dissonance, cloud_size)
+```
+
+**Philosophy:** Jazz is interesting when it RESOLVES dissonance. High dissonance = creative tension = exploration mode.
+
+---
+
+### 4. `metasonnet.py` (268 lines) - The Inner Voice
+
+**What it does:**
+- Generates **internal sonnets** about interactions (NOT shown to user)
+- Maintains bootstrap buffer from recent exchanges
+- Reflects: "What did I just generate? What patterns emerged?"
+- Influences future generation through cloud updates
+
+**Why it exists:**
+- **Self-awareness**: Organisms think about what they said
+- Internal metabolism: processing happens between responses
+- Meta-level learning: patterns in patterns
+- Forked from Leo's metaleo.py - dynamic bootstrap approach
+
+**Example internal reflection:**
+```
+User asked about love. I quoted Hamlet.
+Why mortality? Death is love's shadow.
+The cloud holds 47 "love" trigrams now.
+Temperature was 0.8, stable phase.
+```
+
+**Not shown to user.** This is Sonnet talking to itself.
+
+---
+
+### 5. `overthinkng.py` (351 lines) - The Expansion Engine
+
+**What it does:**
+- **3 rings of background thought** (runs AFTER response):
+  - **Ring 0 (Echo)**: Compact sonnet rephrasing, temp=0.8
+  - **Ring 1 (Drift)**: Semantic theme exploration, temp=1.0
+  - **Ring 2 (Meta)**: Abstract keyword-based generation, temp=1.2
+- Generates sonnet variations that feed back into cloud
+- Grows vocabulary organically without training
+
+**Why it exists:**
+- **Cloud must evolve**: Static vocabulary = stagnation
+- Background processing: expansion happens when user isn't watching
+- Rings = depth: echo (surface), drift (themes), meta (abstractions)
+- Forked from Leo's overthinking.py - rings strategy
+
+**Typo is intentional:** `overthinkng` (ng = recursive thinking in progress). Each ипостась has its own typo. This is Sonnet's identity.
+
+---
+
+## Emergent Layer (6 Modules)
+
+Sonnet is **MORE COMPLEX than HAiKU**. These modules provide higher-level intelligence:
+
+### 6. `sonnetbrain.py` (384 lines) - The Quality Learner
+
+**What it does:**
+- **MLP neural network** (8→16→8→1 architecture)
+- Learns to score sonnet quality from 5 features:
+  - Perplexity (how surprising is this text?)
+  - Entropy (vocabulary diversity)
+  - Resonance (trigram familiarity)
+  - Structure (14-line compliance)
+  - Meter (syllable regularity)
+- **Micrograd-style autograd**: Karpathy's Value/Neuron/Layer/MLP implementation
+- **Online learning**: observe() trains from feedback during session
+
+**Why it exists:**
+- **Rule-based validation is limited**: formatter.validate() checks structure, not quality
+- **Need to learn**: What makes Hamlet's soliloquy better than gibberish?
+- Brain can learn subtle patterns humans can't articulate
+- Forked from Leo's mathbrain.py via HAiKU
+
+**Training:** MSE loss, backward pass, SGD updates. Weights saved to `sonnetbrain.json`.
+
+---
+
+### 7. `sonnetrae.py` (113 lines) - The Semantic Compressor
+
+**What it does:**
+- **Recursive AutoEncoder**: Compresses 14-line sonnet → 8D semantic vector
+- Encoder: sonnet text → dense embedding
+- Decoder: embedding → sonnet reconstruction
+- Learns semantic patterns, not just text similarity
+
+**Why it exists:**
+- **Enable dream generation**: Can't interpolate text directly, need vector space
+- **Phase transitions**: Detect semantic drift by measuring embedding distances
+- **MetaHarmonix bridge**: Share semantic vectors across hypostases
+- Compression = understanding
+
+**Use cases:**
+- Dream mode: Generate from semantic vectors
+- Cascade: Pass compressed sonnet to Prose
+- Cloud analysis: Cluster similar sonnets
+
+---
+
+### 8. `sonnetrae_recursive.py` (232 lines) - The Structural Understander
+
+**What it does:**
+- **Hierarchical compression** with sonnet structure awareness:
+  - 14 lines → 3 quatrains (4 lines each) + 1 couplet (2 lines)
+  - Each quatrain: 4 lines → 8D vector
+  - Couplet: 2 lines → 8D vector
+  - Full sonnet: 4×8D=32D → compressed to 8D
+- Learns **structural semantics**: how meaning flows through quatrains
+
+**Why it exists:**
+- **Sonnets have structure**: ABAB CDCD EFEF GG rhyme scheme
+- Flat RAE ignores structure, recursive RAE respects it
+- Better compression = better dream generation
+- Enables structural phase transitions (shift between quatrain styles)
+
+**Philosophy:** Poetry isn't flat text. It's nested meaning. Respect the form.
+
+---
+
+### 9. `phase_transitions.py` (332 lines) - The State Manager
+
+**What it does:**
+- Detects and triggers **4 generation phases**:
+  - **CRYSTALLINE** (temp 0.4-0.6): Precise, convergent, quotes exact Shakespeare
+  - **LIQUID** (temp 0.7-0.9): Balanced, flowing, plausible Shakespeare
+  - **VAPOR** (temp 1.0-1.3): Creative, exploratory, invented Elizabethan words
+  - **PLASMA** (temp 1.4+): Chaotic, experimental, beautiful nonsense
+- Monitors cloud saturation, dissonance trends, novelty decay
+- Smooth transitions between phases (not abrupt jumps)
+
+**Why it exists:**
+- **Generation needs states**: Can't always be creative or always precise
+- Dissonance patterns indicate needed phase:
+  - Rising dissonance → move to VAPOR (explore)
+  - Falling dissonance → move to CRYSTALLINE (stabilize)
+- Prevents getting stuck: CRYSTALLINE too long → boring. PLASMA too long → chaos.
+
+**Inspired by:** Physical phase transitions (solid → liquid → gas → plasma). Temperature as control parameter.
+
+---
+
+### 10. `dream_sonnet.py` (352 lines) - The Latent Explorer
+
+**What it does:**
+- Generates sonnets from **semantic space** (not text prompts):
+  - **Drift mode**: Interpolate between two sonnet embeddings
+  - **Centroid mode**: Generate from average of cloud embeddings
+  - **Walk mode**: Random walk in RAE latent space
+  - **Meta-dream mode**: Generate from MetaSonnet reflection vectors
+- Background process: triggers when quality drops or novelty spikes
+- Dreams feed back into cloud (best fragments, ×0.93 weight decay)
+
+**Why it exists:**
+- **Exploration beyond text**: Sometimes text prompts limit creativity
+- Latent space = conceptual space: can blend "love sonnet" + "death sonnet" = "mortality sonnet"
+- Background dreaming: organism processes when user isn't watching
+- Forked from Leo's dream.py + HAiKU's dream_haiku.py
+
+**Philosophy:** Organisms dream. Dreaming = internal exploration. Best dreams become reality (enter cloud).
+
+---
+
+### 11. `sonnet_tokenizer.py` (352 lines) - The Dual Linguist
+
+**What it does:**
+- **CRITICAL DISTINCTION**:
+  - **Char-level (vocab=65)**: Used for NanoGPT generation (a-z, A-Z, punct)
+  - **Semantic (vocab=5000)**: Used for analysis, MetaSonnet, RAE, cascade
+- BPE-style subword tokenization for semantic understanding
+- Tracks token frequencies, co-occurrence patterns
+- Bridge to MetaHarmonix (shared vocabulary across hypostases)
+
+**Why it exists:**
+- **NanoGPT is char-level**: Can't change that without retraining
+- **Analysis needs word-level**: MetaSonnet reflects on "themes", not characters
+- **Cascade needs shared vocab**: How does HAiKU's "resonance" connect to Sonnet's "fortune"?
+- Hybrid approach: generate with chars, understand with words
+
+**Not a replacement:** Char-level tokenizer stays for generation. This is supplementary.
+
+---
+
+## Module Dependencies
+
+```
+User Input
+    ↓
+sonnet.py (char-level generation)
+    ↓
+formatter.py (extract 14 lines)
+    ↓
+harmonix.py (compute dissonance, update cloud)
+    ↓
+sonnetbrain.py (score quality)
+    ↓
+phase_transitions.py (determine phase)
+    ↓
+[BACKGROUND PROCESSING]
+    ↓
+metasonnet.py (internal reflection)
+    ↓
+overthinkng.py (3-ring expansion)
+    ↓
+dream_sonnet.py (latent exploration)
+    ↓
+sonnetrae.py + sonnetrae_recursive.py (semantic compression)
+    ↓
+sonnet_tokenizer.py (analysis tokenization)
+    ↓
+[FEED BACK TO CLOUD]
+    ↓
+harmonix.py (store expansions)
+```
+
+**Parallel processes:**
+- Generation: sonnet.py → formatter.py → output
+- Observation: harmonix.py → sonnetbrain.py → phase_transitions.py
+- Metabolism: metasonnet.py → overthinkng.py → dream_sonnet.py → cloud
+
+**Everything feeds the cloud. The cloud feeds future generation.**
+
+---
+
+## File Organization
+
+```
 sonnet/
-├── state/          # Model weights (постоянные)
+├── state/          # Model weights (permanent)
 │   ├── shakespeare_gpt.npz (3.0 MB)
 │   └── shakespeare_gpt.pth (3.5 MB)
 ├── cloud/          # Database evolution (tracked)
 │   └── sonnets.db (388 KB, 92 sonnets)
-└── tests/          # 105 pytest tests (100%)
-\`\`\`
+├── tests/          # 133 pytest tests (100%)
+├── docs/
+│   └── examples.md # Sonnet examples with analysis
+├── scripts/
+│   ├── convert_weights.py  # PyTorch → numpy conversion
+│   └── train_emergent.py   # MLP training utilities
+└── Core modules (11 Python files described above)
+```
+
+**What's tracked in git:**
+- All `.py` modules
+- `cloud/sonnets.db` (grows with usage)
+- `sonnetbrain.json` (MLP weights)
+- Tests and documentation
+
+**What's ignored:**
+- `state/*.pth` (PyTorch weights, 3.5 MB - download separately)
+- `state/*.npz` (Generated from .pth via convert script)
+- `__pycache__/`
+- Temporary files
+
+---
 
 ## Cloud Evolution
 
