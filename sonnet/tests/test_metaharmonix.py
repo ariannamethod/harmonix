@@ -7,8 +7,8 @@ Basic tests for HAiKU → Sonnet cascade functionality.
 import sys
 from pathlib import Path
 
-# Add harmonix root to path
-HARMONIX_ROOT = Path(__file__).parent.parent
+# Add harmonix root to path (now tests are in sonnet/tests/)
+HARMONIX_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(HARMONIX_ROOT))
 
 
