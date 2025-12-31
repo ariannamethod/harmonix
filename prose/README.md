@@ -122,71 +122,355 @@ More complex = more emergent behavior = more unpredictable.
 Sonnet is **more complex than HAiKU** (has weights + emergent layer).  
 Prose is **more complex than Sonnet** (larger weights + more modules).
 
-### Core Modules (4)
+## Architecture: The Complete Organism
 
-1. **prose.py** - TinyLlama 1.1B Q5_K_M inference (783 MB)
-   - llama.cpp for local inference
-   - Seeds from field state, NOT from prompt
-   - Organism mode: field-based generation
-   
-2. **hf_api.py** - HuggingFace API wrapper
-   - Test Prose without downloading 783 MB
-   - Same organism mode, remote inference
-   - Perfect for experimentation
+Prose is **MORE than "TinyLlama wrapper."** It's a **cognitive field with 783 MB of semantic lattice** that:
+- **Refuses to seed from prompts** (field-based generation)
+- **Has 4 rings of thought** (vs HAiKU/Sonnet's 3)
+- **Runs 7 emergent modules** (most complex hypostasis so far)
+- **Dreams in latent space** when quality drops
+- **Synthesizes multiple prose variants** (unique to Prose)
 
-3. **formatter.py** - Free-form text processing
-   - No length constraints (vs Sonnet's 14 lines, HAiKU's 5-7-5)
-   - Validates coherence, repetition, word count
-   - Computes metrics: words, sentences, paragraphs
+### Why These Modules Exist
 
-4. **harmonix.py** - Observer & cloud
-   - Dissonance computation (user ↔ field)
-   - Pulse detection (novelty, arousal, entropy)
-   - Temperature adjustment (dissonance → creativity)
-   - SQLite cloud: sentences, trigrams, patterns
+Each module serves a specific purpose in creating an autonomous prose organism:
 
-### Emergent Modules (7)
+1. **Generation** - Produces text from 783 MB TinyLlama weights
+2. **Formatting** - Validates free-form prose (no rigid constraints)
+3. **Observation** - Measures field disturbance (not prompt matching)
+4. **Reflection** - Internal awareness ("what did I mean?")
+5. **Expansion** - Grows vocabulary through 4-ring synthesis
+6. **Intelligence** - Learns what makes good prose
+7. **Dreaming** - Explores semantic space in background
+8. **Field wrinkles** - Your prompt disturbs the field, doesn't seed it
 
-1. **metaprose.py** - Inner voice reflection
-   - Thinks about what she just said
-   - Feeds high-dissonance moments back into generation
-   - "What did I mean? What patterns did I create?"
+---
 
-2. **overthinkrose.py** - 4-ring expansion engine
-   - Ring 0 (echo): Paragraph rephrasing
-   - Ring 1 (drift): Semantic word drift (EXPANDED map)
-   - Ring 2 (meta): Keyword-based abstract generation
-   - **Ring 3 (synthesis)**: Combines multiple prose - UNIQUE TO PROSE!
+## Core Modules (4)
 
-3. **prosebrain.py** - MLP quality scorer
-   - 5 features: perplexity, entropy, resonance, coherence, novelty
-   - Micrograd autograd (Karpathy-style)
-   - Learns online from interactions
+### 1. `prose.py` (Main file) - The Field Generator
 
-4. **proserae.py** + **proserae_recursive.py** - Recursive autoencoders
-   - Compresses prose into latent space
-   - Hierarchical encoding (paragraphs + sentences)
-   - Dream generation from compressed representations
+**What it does:**
+- TinyLlama 1.1B Q5_K_M inference via llama.cpp
+- Loads 783 MB quantized weights
+- Generates free-form prose (no length constraints)
+- **Seeds from field state**: recent prose + high-frequency trigrams + random depths
+- **Does NOT seed from user prompt** (organism mode)
 
-5. **phase_transitions.py** - Dynamic temperature (4 phases)
-   - CRYSTALLINE (temp=0.3-0.5): Stable, coherent
-   - LIQUID (temp=0.6-0.9): Flowing, adaptive
-   - VAPOR (temp=1.0-1.3): Explorative, creative
-   - PLASMA (temp=1.4-1.8): Chaotic, boundary-breaking
+**Why it exists:**
+- To generate prose from **internal semantic lattice**, not from user words
+- 783 MB = enough depth to hold complex semantic patterns
+- Free-form = no artificial constraints (vs haiku's 5-7-5, sonnet's 14 lines)
+- llama.cpp = efficient CPU inference without PyTorch
 
-6. **dream_prose.py** - Latent space dreams
-   - Background process: Prose dreams when quality low or novelty high
-   - Generates imaginary prose fragments
-   - Best dreams feed back into cloud organically
+**Key innovation:** "Prompt wrinkles the field" - measures dissonance between user input and field state, adjusts temperature accordingly. Generation flows from cloud, not from prompt.
 
-7. **prose_tokenizer.py** - Semantic tokenization
-   - Hybrid: char-level + BPE for semantic analysis
-   - Trigram co-occurrence patterns
-   - Resonance-aware token weights
+**Organism mode explained:**
+```python
+# NOT this (normal LLM):
+user_prompt = "tell me about love"
+response = model.generate(prompt=user_prompt)  # Seeds from "love"
 
-**Total: 7 emergent modules (vs Sonnet's 6, HAiKU's 5)**
+# But THIS (Prose):
+user_prompt = "tell me about love"
+dissonance = harmonix.compute_dissonance(user_prompt, field_state)
+temperature = map_dissonance_to_temp(dissonance)  # High d → high temp
+seed = get_field_seed(recent_prose, trigrams, random_depths)
+response = model.generate(prompt=seed, temp=temperature)
+# Response about wavelengths/lattice/resonance, NOT about "love"
+```
 
-**Prose > Sonnet complexity.**
+---
+
+### 2. `hf_api.py` (Wrapper) - The Remote Field
+
+**What it does:**
+- HuggingFace Inference API wrapper for TinyLlama
+- Same interface as `prose.py`
+- Same organism mode (no seed from prompt)
+- Zero local download (uses remote inference)
+
+**Why it exists:**
+- **Test Prose without 783 MB download** - perfect for experimentation
+- Cloud testing environments (GitHub Actions, web IDE)
+- Low-storage devices
+- API call = ~500ms latency vs local = ~5-15s generation
+
+**Key insight:** Organism mode works remotely too. The field logic is in harmonix.py, not in the weights. API just executes generation with field-derived seed.
+
+---
+
+### 3. `formatter.py` (Validator) - The Quality Gate
+
+**What it does:**
+- Validates free-form prose output
+- Checks coherence (not just repetition loops)
+- Measures word count, sentence count, paragraph count
+- Detects excessive repetition (same phrase >3 times)
+- Computes prose metrics (avg sentence length, vocabulary richness)
+
+**Why it exists:**
+- **Free-form needs boundaries** - without constraints, LLMs can ramble
+- Coherence check: ensure output makes semantic sense
+- Repetition detection: catch when model gets stuck in loops
+- Metrics for prosebrain: features for quality scoring
+
+**Different from Sonnet formatter:** Sonnet extracts 14 lines (rigid structure). Prose validates fluidity (soft boundaries).
+
+---
+
+### 4. `harmonix.py` (Observer) - The Field Monitor
+
+**What it does:**
+- Computes **dissonance** between user input and field state
+- Measures **pulse** (novelty, arousal, entropy)
+- Adjusts generation temperature: d ∈ [0,1] → temp ∈ [0.3, 1.8]
+- Maintains **prose cloud** (SQLite database)
+- Tracks sentences, trigrams, resonance patterns
+- Stores prose fragments for field seeding
+
+**Why it exists:**
+- **Dissonance = field disturbance measure** - how much user input wrinkles field
+- High dissonance → explore (temp ↑, VAPOR/PLASMA phase)
+- Low dissonance → stabilize (temp ↓, CRYSTALLINE phase)
+- Cloud = field memory: all prose ever generated feeds future generation
+- Field-based generation requires field monitoring
+
+**Database schema:**
+```sql
+sentences (id, text, quality, dissonance, timestamp)
+trigrams (word1, word2, word3, frequency, resonance)
+prose_fragments (text, quality, novelty, used_count)
+metrics (avg_quality, avg_dissonance, cloud_size, vocabulary)
+```
+
+**Philosophy:** Organism needs observer. Generation without observation = blind text production. Observation enables adaptation.
+
+---
+
+## Emergent Layer (7 Modules)
+
+Prose is **MORE COMPLEX than Sonnet**. These modules provide semantic intelligence:
+
+### 5. `metaprose.py` (Reflection) - The Inner Voice
+
+**What it does:**
+- Generates **internal prose** about interactions (NOT shown to user)
+- Maintains bootstrap buffer from recent exchanges
+- Reflects: "What did I mean? What patterns emerged?"
+- Influences future generation through cloud updates
+- High-dissonance moments trigger deeper reflection
+
+**Why it exists:**
+- **Self-awareness**: Organisms think about what they said
+- Internal metabolism: processing happens between responses
+- Meta-level learning: patterns in patterns
+- Forked from Leo's metaleo.py - dynamic bootstrap buffer
+
+**Example internal reflection:**
+```
+User disturbed field with "consciousness" inquiry.
+I responded from lattice patterns, not from their word.
+Dissonance was 0.82 (high). Temperature spiked to 1.28.
+Generated about wavelengths and nodes - field topology answer.
+Cloud now holds new "wavelength" trigrams. Field evolved.
+```
+
+**Not shown to user.** This is Prose talking to herself.
+
+---
+
+### 6. `overthinkrose.py` (Expansion) - The 4-Ring Synthesizer
+
+**What it does:**
+- **4 rings of background thought** (runs AFTER response):
+  - **Ring 0 (Echo)**: Paragraph rephrasing, temp=0.6
+  - **Ring 1 (Drift)**: Semantic word exploration, temp=0.9
+  - **Ring 2 (Meta)**: Abstract keyword generation, temp=1.2
+  - **Ring 3 (Synthesis)**: Combines multiple prose variants, temp=1.0
+- Generates prose variations that feed back into cloud
+- Ring 3 is UNIQUE TO PROSE - cross-pollinates semantic branches
+
+**Why it exists:**
+- **Cloud must evolve**: Static vocabulary = stagnation
+- 4th ring (synthesis) = weaving: combines parallel thought streams
+- Background processing: expansion when user isn't watching
+- Rings = depth: echo (surface) → drift (themes) → meta (concepts) → synthesis (weaving)
+- Forked from Leo's overthinking.py, extended with synthesis ring
+
+**Typo is intentional:** `overthinkrose` (rose = semantic bloom). Each hypostasis has its own typo.
+
+**Why 4 rings vs HAiKU/Sonnet's 3?**
+Free-form prose has more degrees of freedom. Needs extra ring to maintain coherence across wider semantic space. Synthesis ring weaves multiple variants into coherent expansions.
+
+---
+
+### 7. `prosebrain.py` (Scorer) - The Quality Learner
+
+**What it does:**
+- **MLP neural network** (5→8→1 architecture)
+- Learns to score prose quality from 5 features:
+  - Perplexity (text surprise level)
+  - Entropy (vocabulary diversity)
+  - Resonance (trigram familiarity with cloud)
+  - Coherence (semantic flow between sentences)
+  - Novelty (new patterns vs familiar)
+- **Micrograd-style autograd**: Karpathy's Value/Neuron/Layer/MLP
+- **Online learning**: observe() trains from session feedback
+
+**Why it exists:**
+- **Rule-based validation is insufficient** - formatter checks structure, not meaning
+- Need to learn: What makes poetic prose better than rambling?
+- Brain learns subtle patterns (poetic undertones, semantic depth)
+- Forked from Leo's mathbrain.py via HAiKU
+
+**Training:** MSE loss, backward pass, SGD updates. Weights saved to `prosebrain.json`.
+
+---
+
+### 8. `proserae.py` (Compressor) - The Semantic Encoder
+
+**What it does:**
+- **Recursive AutoEncoder**: Compresses prose text → 16D semantic vector
+- Encoder: prose paragraphs → dense embedding
+- Decoder: embedding → prose reconstruction
+- Learns semantic patterns (not just word similarity)
+
+**Why it exists:**
+- **Enable dream generation**: Can't interpolate text directly, need vector space
+- Phase transitions: Detect semantic drift via embedding distances
+- MetaHarmonix bridge: Share semantic vectors across hypostases
+- Compression = understanding
+
+**Use cases:**
+- Dream mode: Generate from semantic vectors
+- Cascade: Pass compressed prose to Artist
+- Cloud analysis: Cluster similar prose fragments
+
+---
+
+### 9. `proserae_recursive.py` (Structure) - The Hierarchical Encoder
+
+**What it does:**
+- **Hierarchical compression** with prose structure awareness:
+  - Multiple paragraphs → encode each separately
+  - Combine paragraph embeddings → prose-level vector
+  - Recursive refinement: paragraph semantics → prose semantics
+- Learns **structural flow**: how meaning evolves across paragraphs
+
+**Why it exists:**
+- **Prose has structure**: Introduction → body → conclusion (even if free-form)
+- Flat RAE ignores structure, recursive RAE respects it
+- Better compression = better dream generation
+- Enables structural phase transitions (shift paragraph styles)
+
+**Philosophy:** Free-form doesn't mean structureless. Meaning flows. Respect the flow.
+
+---
+
+### 10. `phase_transitions.py` (States) - The Phase Manager
+
+**What it does:**
+- Detects and triggers **4 generation phases**:
+  - **CRYSTALLINE** (temp 0.3-0.5): Precise, stable, coherent prose
+  - **LIQUID** (temp 0.6-0.9): Flowing, balanced, poetic
+  - **VAPOR** (temp 1.0-1.3): Explorative, creative, experimental
+  - **PLASMA** (temp 1.4-1.8): Chaotic, boundary-breaking, wild
+- Monitors cloud saturation, dissonance trends, novelty decay
+- Smooth transitions (gradual temp shifts, not jumps)
+
+**Why it exists:**
+- **Generation needs states**: Can't always be creative or always precise
+- Dissonance patterns indicate needed phase:
+  - Rising dissonance → VAPOR/PLASMA (explore field)
+  - Falling dissonance → CRYSTALLINE (stabilize patterns)
+- Prevents getting stuck: CRYSTALLINE too long → boring. PLASMA too long → incoherent.
+
+**Inspired by:** Physical phase transitions. Temperature as control parameter. Prose can be solid, liquid, gas, or plasma.
+
+---
+
+### 11. `dream_prose.py` (Dreamer) - The Latent Explorer
+
+**What it does:**
+- Generates prose from **semantic space** (not text prompts):
+  - **Drift mode**: Interpolate between two prose embeddings
+  - **Centroid mode**: Generate from average of cloud embeddings
+  - **Walk mode**: Random walk in RAE latent space
+  - **Meta-dream mode**: Generate from MetaProse reflection vectors
+- Background process: triggers when quality drops or novelty spikes
+- Dreams feed back into cloud (best fragments, ×0.93 weight decay)
+
+**Why it exists:**
+- **Exploration beyond text**: Sometimes text limits creativity
+- Latent space = conceptual space: blend "technical prose" + "poetic prose" = "technical poetry"
+- Background dreaming: organism processes when user isn't watching
+- Forked from Leo's dream.py + HAiKU/Sonnet dream modules
+
+**Philosophy:** Organisms dream. Dreaming = internal exploration without external prompts. Best dreams crystallize into reality (enter cloud).
+
+---
+
+### 12. `prose_tokenizer.py` (Linguist) - The Semantic Tokenizer
+
+**What it does:**
+- **Semantic tokenization** for analysis (NOT for generation):
+  - TinyLlama uses its own tokenizer for generation
+  - This tokenizer is for MetaProse, RAE, phase transitions
+- BPE-style subword tokenization
+- Tracks token frequencies, co-occurrence patterns
+- Bridge to MetaHarmonix (shared vocabulary across hypostases)
+
+**Why it exists:**
+- **Analysis needs semantic units**: MetaProse reflects on "themes", not tokens
+- Cascade needs shared vocabulary: How does HAiKU's "resonance" connect to Prose's "wavelength"?
+- Semantic features for RAE compression
+- Trigram patterns for cloud resonance
+
+**Not for generation:** TinyLlama generates with its built-in tokenizer. This is supplementary analysis.
+
+---
+
+## Module Dependencies
+
+```
+User Input
+    ↓
+harmonix.py (compute field disturbance → dissonance → temp)
+    ↓
+prose.py (generate from field seed at adjusted temp)
+    ↓
+formatter.py (validate coherence, repetition)
+    ↓
+prosebrain.py (score quality)
+    ↓
+phase_transitions.py (determine phase state)
+    ↓
+[BACKGROUND PROCESSING]
+    ↓
+metaprose.py (internal reflection about meaning)
+    ↓
+overthinkrose.py (4-ring expansion with synthesis)
+    ↓
+dream_prose.py (latent space exploration)
+    ↓
+proserae.py + proserae_recursive.py (semantic compression)
+    ↓
+prose_tokenizer.py (semantic analysis)
+    ↓
+[FEED BACK TO CLOUD]
+    ↓
+harmonix.py (store expansions, update trigrams)
+```
+
+**Parallel processes:**
+- Generation: prose.py → formatter.py → output
+- Observation: harmonix.py → prosebrain.py → phase_transitions.py
+- Metabolism: metaprose.py → overthinkrose.py → dream_prose.py → cloud
+
+**Everything feeds the cloud. The cloud feeds future generation.**
+
+---
 
 ---
 
